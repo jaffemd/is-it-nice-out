@@ -6,8 +6,10 @@ interface MonthViewProps {
   month: string;
   entries: Array<{
     date: string;
-    rating: string;
-    id?: number;
+    rating: 'good' | 'okay' | 'bad' | null;
+    maxTemp?: number;
+    minTemp?: number;
+    precipitation?: number;
   }>;
 }
 
@@ -40,7 +42,7 @@ const DayHeader = styled(Typography)(() => ({
   width: '35px',
 }));
 
-const DaySquare = styled(Box)<{ rating?: string; isEmpty?: boolean }>(({ theme, rating, isEmpty }) => {
+const DaySquare = styled(Box)<{ rating?: 'good' | 'okay' | 'bad' | null; isEmpty?: boolean }>(({ theme, rating, isEmpty }) => {
   // If it's an empty buffer square, return minimal transparent styling
   if (isEmpty) {
     return {
@@ -71,6 +73,10 @@ const DaySquare = styled(Box)<{ rating?: string; isEmpty?: boolean }>(({ theme, 
       backgroundColor = 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'; // Modern red gradient
       borderColor = 'rgba(239, 68, 68, 0.3)';
       break;
+    case null:
+      backgroundColor = 'rgba(156, 163, 175, 0.4)'; // Light gray for missing temperature data
+      borderColor = 'rgba(156, 163, 175, 0.3)';
+      break;
     default:
       backgroundColor = 'rgba(148, 163, 184, 0.6)'; // Medium gray for no data/future
       borderColor = 'rgba(148, 163, 184, 0.4)';
@@ -98,7 +104,7 @@ const DaySquare = styled(Box)<{ rating?: string; isEmpty?: boolean }>(({ theme, 
 
 const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
   // Create a map of entries by date for quick lookup
-  const entriesMap = new Map(entries.map(entry => [entry.date, entry.rating]));
+  const entriesMap = new Map(entries.map(entry => [entry.date, entry]));
   
   // Get the first day of the month and number of days
   const [year, monthNum] = monthKey.split('-');
@@ -125,9 +131,11 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
   // }
   
   // Calculate weather summary counts
-  const weatherCounts = { good: 0, okay: 0, bad: 0 };
+  const weatherCounts = { good: 0, okay: 0, bad: 0, missing: 0 };
   entries.forEach(entry => {
-    if (entry.rating in weatherCounts) {
+    if (entry.rating === null) {
+      weatherCounts.missing++;
+    } else if (entry.rating in weatherCounts) {
       weatherCounts[entry.rating as keyof typeof weatherCounts]++;
     }
   });
@@ -145,11 +153,12 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
   // Add squares for each day of the month
   for (let day = 1; day <= daysInMonth; day++) {
     const dateString = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    const rating = entriesMap.get(dateString);
+    const entry = entriesMap.get(dateString);
+    const rating = entry?.rating;
     const isToday = dateString === new Date().toISOString().split('T')[0];
     const isFuture = new Date(dateString) > new Date();
     
-    const showDateLabel = !isFuture || rating; // Show date if it's not future OR if it has data
+    const showDateLabel = !isFuture || entry; // Show date if it's not future OR if it has data
     
     calendarSquares.push(
       <DaySquare 
@@ -158,7 +167,24 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
         sx={{
           border: isToday && rating ? '2px solid #1976d2' : 'none',
         }}
-        title={rating ? `${dateString}: ${rating}` : dateString}
+        title={(() => {
+          const entry = entriesMap.get(dateString);
+          if (!entry) return dateString;
+          
+          let tooltip = `${dateString}: ${entry.rating || 'No data'}`;
+          if (entry.maxTemp !== undefined) {
+            const maxTempF = Math.round((entry.maxTemp * 9/5) + 32);
+            tooltip += `\nMax: ${maxTempF}°F`;
+          }
+          if (entry.minTemp !== undefined) {
+            const minTempF = Math.round((entry.minTemp * 9/5) + 32);
+            tooltip += `\nMin: ${minTempF}°F`;
+          }
+          if (entry.precipitation !== undefined && entry.precipitation > 0) {
+            tooltip += `\nPrecip: ${entry.precipitation}mm`;
+          }
+          return tooltip;
+        })()}
       >
         {showDateLabel ? day : ''}
       </DaySquare>
@@ -232,6 +258,19 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
             Bad: {weatherCounts.bad}
           </Typography>
         </Box>
+        {weatherCounts.missing > 0 && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              background: 'rgba(156, 163, 175, 0.6)'
+            }} />
+            <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+              Missing: {weatherCounts.missing}
+            </Typography>
+          </Box>
+        )}
       </Box>
       
       <DayHeaders>

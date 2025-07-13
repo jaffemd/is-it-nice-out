@@ -1,46 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
 import type { CalendarData } from '../../services/api';
 import MonthView from './MonthView';
 
 const CalendarGrid: React.FC = () => {
-  const [calendarData, setCalendarData] = useState<CalendarData>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCalendarData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getCalendarData();
-      setCalendarData(data);
-    } catch (err) {
-      setError('Failed to load calendar data');
-      console.error('Error fetching calendar data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCalendarData();
-  }, []);
-
-  // Refresh data when the page becomes visible again (e.g., after navigating back from form)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        fetchCalendarData();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  const { 
+    data: calendarData = {}, 
+    isLoading: loading, 
+    error,
+    isError 
+  } = useQuery({
+    queryKey: ['weatherData', 'chicago'],
+    queryFn: getCalendarData,
+    refetchOnWindowFocus: true,
+    retry: 2,
+    retryDelay: 1000,
+  });
 
   if (loading) {
     return (
@@ -50,10 +27,12 @@ const CalendarGrid: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Box sx={{ p: 2 }}>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error">
+          {error instanceof Error ? error.message : 'Failed to load weather data'}
+        </Alert>
       </Box>
     );
   }
