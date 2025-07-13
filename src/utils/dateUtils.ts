@@ -1,6 +1,6 @@
 /**
- * Calculate the date range for fetching 13 calendar months of weather data
- * Example: If today is July 13, 2025 → fetch July 1, 2024 to July 12, 2025
+ * Calculate the date range for fetching 24 calendar months of weather data
+ * Example: If today is July 13, 2025 → fetch July 12, 2025 back to July 1, 2023
  */
 export function getWeatherDateRange(): { startDate: string; endDate: string } {
   const today = new Date();
@@ -9,21 +9,22 @@ export function getWeatherDateRange(): { startDate: string; endDate: string } {
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   
-  // Get the first day of current month
+  // Get the current month and year
   const currentMonth = yesterday.getMonth(); // 0-indexed
   const currentYear = yesterday.getFullYear();
   
-  // Calculate 13 months back from current month
-  // If current month is July (6), 13 months back is June (5) of previous year
-  let startMonth = currentMonth - 12; // Go back 12 months from current
+  // Calculate 24 months back from current month
+  // If current month is July (6), 24 months back is July (6) of 2 years ago
+  let startMonth = currentMonth - 23; // Go back 23 months from current (24 total months)
   let startYear = currentYear;
   
-  if (startMonth < 0) {
+  // Handle year rollover
+  while (startMonth < 0) {
     startMonth += 12;
     startYear -= 1;
   }
   
-  // Start date: First day of the month 13 months ago
+  // Start date: First day of the month 24 months ago
   const startDate = new Date(startYear, startMonth, 1);
   
   // End date: Yesterday (most recent complete day)

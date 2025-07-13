@@ -33,11 +33,11 @@ Transform the static weather app into a dynamic application that fetches real we
 #### API Integration Details:
 - **Location:** Chicago, IL (Coordinates: 41.8781, -87.6298)
 - **Data Required:** Daily max/min temperature, precipitation
-- **Date Range:** 13 calendar months back from current date
-  - Example: If today is July 13, 2025 → fetch July 1, 2024 to July 12, 2025
+- **Date Range:** 24 calendar months back from current date (starting from 1st of oldest month)
+  - Example: If today is July 13, 2025 → fetch July 12, 2025 back to July 1, 2023
 - **API Endpoint Example (Open-Meteo):**
   ```
-  https://archive-api.open-meteo.com/v1/archive?latitude=41.8781&longitude=-87.6298&start_date=2024-07-01&end_date=2025-07-12&daily=temperature_2m_max,temperature_2m_min,precipitation_sum
+  https://archive-api.open-meteo.com/v1/archive?latitude=41.8781&longitude=-87.6298&start_date=2023-07-01&end_date=2025-07-12&daily=temperature_2m_max,temperature_2m_min,precipitation_sum
   ```
 
 ### 3. Weather Rating Algorithm
@@ -267,7 +267,7 @@ VITE_RADAR_API_KEY=your_radar_api_key
 
 ## Requirements Summary
 
-✅ **Date Range:** 13 calendar months back from current date  
+✅ **Date Range:** 24 calendar months back from current date (starting from 1st of oldest month)
 ✅ **Location Scope:** US-focused (sufficient for current needs)  
 ✅ **Data Persistence:** Session-only, no cross-session persistence  
 ✅ **Performance:** Maximum 5 location tabs  

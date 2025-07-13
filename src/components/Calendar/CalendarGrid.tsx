@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
-import type { CalendarData } from '../../services/api';
 import MonthView from './MonthView';
 
 const CalendarGrid: React.FC = () => {
