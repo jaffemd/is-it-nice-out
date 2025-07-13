@@ -3,6 +3,9 @@ import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
 import MonthView from './MonthView';
+import YearHeader from './YearHeader';
+import YearSummaryChart from './YearSummaryChart';
+import YearlyTotalChart from './YearlyTotalChart';
 
 const CalendarGrid: React.FC = () => {
   const { 
@@ -40,12 +43,26 @@ const CalendarGrid: React.FC = () => {
   const sortedMonths = Object.keys(calendarData)
     .sort((a, b) => new Date(b + '-01').getTime() - new Date(a + '-01').getTime());
 
+  // Group months by year for year headers
+  const monthsByYear: { [year: string]: string[] } = {};
+  sortedMonths.forEach(monthKey => {
+    const year = monthKey.split('-')[0];
+    if (!monthsByYear[year]) {
+      monthsByYear[year] = [];
+    }
+    monthsByYear[year].push(monthKey);
+  });
+
+  // Sort years (newest first)
+  const sortedYears = Object.keys(monthsByYear)
+    .sort((a, b) => parseInt(b) - parseInt(a));
+
   return (
     <Box sx={{ p: 0 }}>
       {/* App Title */}
       <Box sx={{ 
         textAlign: 'center', 
-        mb: 4,
+        mb: 3,
         pt: 2
       }}>
         <Typography 
@@ -59,7 +76,71 @@ const CalendarGrid: React.FC = () => {
         >
           Was The Weather Nice Enough To Spend Time Outside?
         </Typography>
+        <Typography 
+          variant="h6" 
+          component="h2" 
+          sx={{ 
+            fontWeight: 300,
+            color: '#64748b',
+            fontSize: { xs: '1rem', sm: '1.125rem' },
+            mt: 1
+          }}
+        >
+          Chicago, IL
+        </Typography>
       </Box>
+      
+      {/* Year Summary Charts */}
+      {sortedMonths.length > 0 && (
+        <Box sx={{ mb: 4, px: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            gap: 2, 
+            maxWidth: '400px',
+            mx: 'auto'
+          }}>
+            <YearlyTotalChart calendarData={calendarData} />
+            {sortedYears.map((year) => (
+              <YearSummaryChart key={year} year={year} calendarData={calendarData} />
+            ))}
+          </Box>
+          
+          {/* Single Legend */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 2, 
+            mt: 3,
+            flexWrap: 'wrap'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 12, height: 12, bgcolor: '#22c55e', borderRadius: '2px' }} />
+              <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                70%+
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 12, height: 12, bgcolor: '#eab308', borderRadius: '2px' }} />
+              <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                50-70%
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 12, height: 12, bgcolor: '#f97316', borderRadius: '2px' }} />
+              <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                30-50%
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 12, height: 12, bgcolor: '#ef4444', borderRadius: '2px' }} />
+              <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                &lt;30%
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      )}
       
       {sortedMonths.length === 0 ? (
         <Box sx={{
@@ -75,13 +156,18 @@ const CalendarGrid: React.FC = () => {
           </Typography>
         </Box>
       ) : (
-        sortedMonths.map((monthKey) => (
-          <MonthView 
-            key={monthKey}
-            monthKey={monthKey}
-            month={calendarData[monthKey].month}
-            entries={calendarData[monthKey].entries}
-          />
+        sortedYears.map((year) => (
+          <React.Fragment key={year}>
+            <YearHeader year={year} />
+            {monthsByYear[year].map((monthKey) => (
+              <MonthView 
+                key={monthKey}
+                monthKey={monthKey}
+                month={calendarData[monthKey].month}
+                entries={calendarData[monthKey].entries}
+              />
+            ))}
+          </React.Fragment>
         ))
       )}
     </Box>
