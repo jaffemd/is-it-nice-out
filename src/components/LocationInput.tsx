@@ -153,17 +153,18 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
       p: 4,
       textAlign: 'center'
     }}>
+      {/* App Title */}
       <Typography 
-        variant="h4" 
+        variant="h5" 
         component="h1" 
-        gutterBottom
         sx={{ 
           fontWeight: 400,
           color: '#4a5568',
-          mb: 3
+          fontSize: '1.5rem',
+          mb: 4
         }}
       >
-        Enter Your Location
+        Historical Weather Simple Rating Tracker
       </Typography>
       
       <Typography 
@@ -173,7 +174,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
           mb: 4
         }}
       >
-        Search for your city to view historical weather ratings
+        Search for a location to view weather rating data for the past 3 calendar years
       </Typography>
       
       <Box sx={{ position: 'relative', mb: 2 }}>

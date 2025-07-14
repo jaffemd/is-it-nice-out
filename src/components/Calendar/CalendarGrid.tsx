@@ -29,8 +29,42 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
-        <CircularProgress />
+      <Box sx={{ p: 0 }}>
+        {/* App Title */}
+        <Box sx={{ 
+          textAlign: 'center', 
+          mb: 3,
+          pt: 2
+        }}>
+          <Typography 
+            variant="h5" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 400,
+              color: '#4a5568',
+              fontSize: '1.5rem'
+            }}
+          >
+            Historical Weather Simple Rating Tracker
+          </Typography>
+          <Typography 
+            variant="h6" 
+            component="h2" 
+            sx={{ 
+              fontWeight: 300,
+              color: '#64748b',
+              fontSize: '1.125rem',
+              mt: 1
+            }}
+          >
+            Data for {locationName || 'Chicago, IL'}
+          </Typography>
+        </Box>
+        
+        {/* Loading Spinner */}
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
       </Box>
     );
   }
