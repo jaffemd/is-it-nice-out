@@ -31,10 +31,13 @@ const theme = createTheme({
     MuiContainer: {
       styleOverrides: {
         root: {
-          maxWidth: 'min(600px, 100vw) !important', // Responsive max width
+          maxWidth: 'min(600px, 100vw) !important', // Default max width for single column
           paddingLeft: '16px',
           paddingRight: '16px',
           margin: '0 auto', // Center the app
+          '@media (min-width: 800px)': {
+            maxWidth: 'min(1200px, 100vw) !important', // Two column layout width
+          }
         },
       },
     },

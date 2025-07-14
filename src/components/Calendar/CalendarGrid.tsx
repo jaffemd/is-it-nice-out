@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Typography, CircularProgress, Alert, Tabs, Tab } from '@mui/material';
+import React from 'react';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
 import MonthView from './MonthView';
@@ -8,8 +8,6 @@ import YearSummaryChart from './YearSummaryChart';
 import YearlyTotalChart from './YearlyTotalChart';
 
 const CalendarGrid: React.FC = () => {
-  const [tabValue, setTabValue] = useState(0);
-  
   const { 
     data: calendarData = {}, 
     isLoading: loading, 
@@ -22,10 +20,6 @@ const CalendarGrid: React.FC = () => {
     retry: 2,
     retryDelay: 1000,
   });
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
 
   if (loading) {
     return (
@@ -63,17 +57,17 @@ const CalendarGrid: React.FC = () => {
   const sortedYears = Object.keys(monthsByYear)
     .sort((a, b) => parseInt(b) - parseInt(a));
 
-  // Summary Tab Content
-  const renderSummaryTab = () => (
+  // Summary Content Component
+  const renderSummaryContent = () => (
     <>
       {/* Year Summary Charts */}
       {sortedMonths.length > 0 && (
-        <Box sx={{ mb: 4, px: 2 }}>
+        <Box sx={{ mb: 4 }}>
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column',
             gap: 2, 
-            maxWidth: 'min(560px, 90vw)',
+            maxWidth: '100%',
             mx: 'auto'
           }}>
             <YearlyTotalChart calendarData={calendarData} />
@@ -135,8 +129,8 @@ const CalendarGrid: React.FC = () => {
     </>
   );
 
-  // Calendar View Tab Content
-  const renderCalendarTab = () => (
+  // Calendar Content Component
+  const renderCalendarContent = () => (
     <>
       {sortedMonths.length === 0 ? (
         <Box sx={{
@@ -202,42 +196,61 @@ const CalendarGrid: React.FC = () => {
         </Typography>
       </Box>
       
-      {/* Tab Navigation */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange} 
-          centered
-          sx={{
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontSize: '1rem',
-              fontWeight: 500,
-              '&:focus': {
-                outline: 'none',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  height: '2px',
-                  backgroundColor: 'primary.main',
-                  borderRadius: '1px 1px 0 0',
-                }
-              },
-              position: 'relative'
-            }
-          }}
-        >
-          <Tab label="Summary" />
-          <Tab label="Calendar View" />
-        </Tabs>
+      {/* Responsive Layout */}
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: '600px',
+        mx: 'auto',
+        gap: 0,
+        height: 'auto',
+        '@media (min-width: 800px)': {
+          flexDirection: 'row',
+          maxWidth: '1200px',
+          gap: 3,
+          height: 'calc(100vh - 200px)',
+        }
+      }}>
+        
+        {/* Summary Column */}
+        <Box sx={{
+          flex: 'none',
+          maxWidth: '600px',
+          mx: 'auto',
+          overflow: 'visible',
+          pr: 0,
+          mb: 4,
+          '@media (min-width: 800px)': {
+            flex: 1,
+            maxWidth: '50%',
+            mx: 0,
+            overflow: 'auto',
+            pr: 2,
+            mb: 0,
+          }
+        }}>
+          {renderSummaryContent()}
+        </Box>
+        
+        {/* Calendar Column */}
+        <Box sx={{
+          flex: 'none',
+          maxWidth: '600px',
+          mx: 'auto',
+          overflow: 'visible',
+          pl: 0,
+          '@media (min-width: 800px)': {
+            flex: 1,
+            maxWidth: '50%',
+            mx: 0,
+            overflow: 'auto',
+            pl: 2,
+          }
+        }}>
+          {renderCalendarContent()}
+        </Box>
+        
       </Box>
-      
-      {/* Tab Content */}
-      {tabValue === 0 && renderSummaryTab()}
-      {tabValue === 1 && renderCalendarTab()}
     </Box>
   );
 };
