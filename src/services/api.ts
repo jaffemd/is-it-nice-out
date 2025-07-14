@@ -42,15 +42,16 @@ function calculateWeatherRating(
   
   // Convert from Celsius to Fahrenheit
   const maxTempF = (maxTemp * 9/5) + 32;
+  const minTempF = (minTemp * 9/5) + 32;
   
   // Automatic "bad" conditions
-  if (maxTempF > 85 || maxTempF < 45) return 'bad';
+  if (maxTempF > 85 || maxTempF < 50 || minTempF < 40) return 'bad';
   
   // Base temperature rating
   let baseRating: 'good' | 'okay';
-  if (maxTempF >= 55 && maxTempF <= 82) {
+  if (maxTempF >= 57 && maxTempF <= 82) {
     baseRating = 'good';
-  } else if ((maxTempF >= 45 && maxTempF <= 54) || (maxTempF >= 83 && maxTempF <= 85)) {
+  } else if ((maxTempF >= 50 && maxTempF <= 57) || (maxTempF >= 82 && maxTempF <= 85)) {
     baseRating = 'okay';
   } else {
     return 'bad';
@@ -58,8 +59,7 @@ function calculateWeatherRating(
   
   // Precipitation adjustments
   if (precip > 10) return 'bad'; // Heavy precipitation
-  if (precip > 2) return baseRating === 'good' ? 'okay' : baseRating; // Light precipitation
-  if (precip > 0.5 && baseRating === 'okay') return 'okay'; // Very light precipitation on borderline days
+  if (precip > 2) return baseRating === 'good' ? 'okay' : 'bad'; // Light precipitation
   
   return baseRating;
 }
