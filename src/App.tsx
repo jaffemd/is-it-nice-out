@@ -1,8 +1,9 @@
-// import React from 'react'; // Not needed in React 17+ with new JSX transform
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
 import CalendarGrid from './components/Calendar/CalendarGrid';
+import LocationInput from './components/LocationInput';
 
 // Create Material-UI theme with mobile-first approach
 const theme = createTheme({
@@ -44,7 +45,26 @@ const theme = createTheme({
   },
 });
 
+interface SelectedLocation {
+  id: string;
+  formattedAddress: string;
+  latitude: number;
+  longitude: number;
+  city?: string;
+  state?: string;
+}
+
 function App() {
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+
+  const handleLocationSelect = (location: SelectedLocation) => {
+    setSelectedLocation(location);
+  };
+
+  const handleStartOver = () => {
+    setSelectedLocation(null);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -60,7 +80,20 @@ function App() {
         }}>
           <Container maxWidth="sm">
             <Routes>
-              <Route path="/" element={<CalendarGrid />} />
+              <Route path="/" element={
+                selectedLocation ? (
+                  <CalendarGrid 
+                    onStartOver={handleStartOver}
+                    locationName={selectedLocation.formattedAddress}
+                    coordinates={{ 
+                      latitude: selectedLocation.latitude, 
+                      longitude: selectedLocation.longitude 
+                    }}
+                  />
+                ) : (
+                  <LocationInput onLocationSelect={handleLocationSelect} />
+                )
+              } />
             </Routes>
           </Container>
         </Box>

@@ -122,12 +122,25 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
         },
         '& .recharts-bar-rectangle:focus': {
           outline: 'none !important'
+        },
+        '& svg': {
+          outline: 'none !important'
+        },
+        '& svg:focus': {
+          outline: 'none !important'
+        },
+        '& *': {
+          '&:focus': {
+            outline: 'none !important'
+          }
         }
       }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart 
             data={monthSummaries} 
             margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+            tabIndex={-1}
+            style={{ outline: 'none' }}
           >
             <XAxis 
               dataKey="shortMonth" 

@@ -258,7 +258,6 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
       String(today.getMonth() + 1).padStart(2, '0') + '-' + 
       String(today.getDate()).padStart(2, '0');
     
-    const isToday = dateString === todayDateString;
     const isFuture = dateString > todayDateString;
     
     const showDateLabel = !isFuture || dayEntry; // Show date if it's not future OR if it has data
@@ -276,7 +275,6 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
         <DaySquare 
           rating={rating}
           sx={{
-            border: isToday && rating ? '2px solid #1976d2' : 'none',
             cursor: dayEntry ? 'pointer' : 'default',
           }}
           onClick={() => {

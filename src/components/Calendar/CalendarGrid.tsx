@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, CircularProgress, Alert } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
 import MonthView from './MonthView';
@@ -7,15 +7,21 @@ import YearHeader from './YearHeader';
 import YearSummaryChart from './YearSummaryChart';
 import YearlyTotalChart from './YearlyTotalChart';
 
-const CalendarGrid: React.FC = () => {
+interface CalendarGridProps {
+  onStartOver?: () => void;
+  locationName?: string;
+  coordinates?: { latitude: number; longitude: number };
+}
+
+const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, coordinates }) => {
   const { 
     data: calendarData = {}, 
     isLoading: loading, 
     error,
     isError 
   } = useQuery({
-    queryKey: ['weatherData', 'chicago'],
-    queryFn: getCalendarData,
+    queryKey: ['weatherData', coordinates?.latitude, coordinates?.longitude],
+    queryFn: () => getCalendarData(coordinates),
     refetchOnWindowFocus: true,
     retry: 2,
     retryDelay: 1000,
@@ -192,8 +198,23 @@ const CalendarGrid: React.FC = () => {
             mt: 1
           }}
         >
-          Data for Chicago, IL
+          Data for {locationName || 'Chicago, IL'}
         </Typography>
+        
+        {onStartOver && (
+          <Button
+            variant="outlined"
+            onClick={onStartOver}
+            sx={{
+              mt: 2,
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontSize: '0.875rem',
+            }}
+          >
+            Start Over
+          </Button>
+        )}
       </Box>
       
       {/* Responsive Layout */}
