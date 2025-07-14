@@ -1,5 +1,5 @@
-// import React from 'react'; // Not needed in React 17+ with new JSX transform
-import { Box, Typography, styled } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, styled, Tooltip } from '@mui/material';
 
 interface MonthViewProps {
   monthKey: string;
@@ -9,7 +9,10 @@ interface MonthViewProps {
     rating: 'good' | 'okay' | 'bad' | null;
     maxTemp?: number;
     minTemp?: number;
+    apparentTempMean?: number;
     precipitation?: number;
+    snowfall?: number;
+    weatherCode?: number;
   }>;
 }
 
@@ -17,7 +20,7 @@ const CalendarGrid = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: 'repeat(7, 1fr)',
   gap: '3px',
-  maxWidth: '280px',
+  maxWidth: 'min(320px, 85vw)',
   margin: '0 auto',
   justifyItems: 'center',
   placeItems: 'center',
@@ -28,14 +31,14 @@ const DayHeaders = styled(Box)(() => ({
   display: 'grid',
   gridTemplateColumns: 'repeat(7, 1fr)',
   gap: '3px',
-  maxWidth: '280px',
+  maxWidth: 'min(320px, 85vw)',
   margin: '0 auto 8px auto',
   justifyItems: 'center',
   placeItems: 'center',
 }));
 
 const DayHeader = styled(Typography)(() => ({
-  fontSize: '0.7rem',
+  fontSize: '0.75rem',
   fontWeight: 600,
   color: 'rgba(71, 85, 105, 0.7)',
   textAlign: 'center',
@@ -93,18 +96,114 @@ const DaySquare = styled(Box)<{ rating?: 'good' | 'okay' | 'bad' | null; isEmpty
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    fontSize: '0.7rem',
+    fontSize: '0.75rem',
     fontWeight: 600,
     color: rating ? theme.palette.common.white : 'rgba(71, 85, 105, 0.6)',
     cursor: 'default',
     boxShadow: rating ? '0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)' : '0 2px 6px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
     backdropFilter: 'blur(8px)',
+    transition: 'transform 0.1s ease-in-out',
+    '&:hover': {
+      transform: rating ? 'scale(1.05)' : 'none',
+    },
   };
 });
 
 const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
+  const [clickedDay, setClickedDay] = useState<string | null>(null);
+  
   // Create a map of entries by date for quick lookup
   const entriesMap = new Map(entries.map(entry => [entry.date, entry]));
+  
+  // Helper function to convert weather code to description
+  const getWeatherDescription = (weatherCode: number): string => {
+    const weatherDescriptions: { [key: number]: string } = {
+      0: 'Clear sky',
+      1: 'Mainly clear',
+      2: 'Partly cloudy',
+      3: 'Overcast',
+      45: 'Fog',
+      48: 'Depositing rime fog',
+      51: 'Light drizzle',
+      53: 'Moderate drizzle',
+      55: 'Dense drizzle',
+      56: 'Light freezing drizzle',
+      57: 'Dense freezing drizzle',
+      61: 'Slight rain',
+      63: 'Moderate rain',
+      65: 'Heavy rain',
+      66: 'Light freezing rain',
+      67: 'Heavy freezing rain',
+      71: 'Slight snow fall',
+      73: 'Moderate snow fall',
+      75: 'Heavy snow fall',
+      77: 'Snow grains',
+      80: 'Slight rain showers',
+      81: 'Moderate rain showers',
+      82: 'Violent rain showers',
+      85: 'Slight snow showers',
+      86: 'Heavy snow showers',
+      95: 'Thunderstorm',
+      96: 'Thunderstorm with slight hail',
+      99: 'Thunderstorm with heavy hail'
+    };
+    
+    return weatherDescriptions[weatherCode] || `Weather code ${weatherCode}`;
+  };
+  
+  // Helper function to format tooltip content
+  const formatTooltipContent = (entry: MonthViewProps['entries'][0] | undefined, dateString: string) => {
+    if (!entry) return null;
+    
+    const lines = [];
+    lines.push(`${dateString}: ${entry.rating || 'No data'}`);
+    
+    // Max temp F
+    if (entry.maxTemp !== undefined) {
+      const maxTempF = Math.round((entry.maxTemp * 9/5) + 32);
+      lines.push(`Max temp: ${maxTempF}°F`);
+    }
+    
+    // Min temp F
+    if (entry.minTemp !== undefined) {
+      const minTempF = Math.round((entry.minTemp * 9/5) + 32);
+      lines.push(`Min temp: ${minTempF}°F`);
+    }
+    
+    // Average apparent temp F
+    if (entry.apparentTempMean !== undefined) {
+      const apparentTempF = Math.round((entry.apparentTempMean * 9/5) + 32);
+      lines.push(`Avg apparent temp: ${apparentTempF}°F`);
+    }
+    
+    // Precipitation in inches
+    if (entry.precipitation !== undefined && entry.precipitation > 0) {
+      const precipInches = (entry.precipitation / 25.4).toFixed(2);
+      lines.push(`Precipitation: ${precipInches}"`);
+    }
+    
+    // Snowfall in inches (only if > 0)
+    if (entry.snowfall !== undefined && entry.snowfall > 0) {
+      const snowfallInches = (entry.snowfall / 25.4).toFixed(2);
+      lines.push(`Snowfall: ${snowfallInches}"`);
+    }
+    
+    // Weather condition
+    if (entry.weatherCode !== undefined) {
+      const weatherDescription = getWeatherDescription(entry.weatherCode);
+      lines.push(`Condition: ${weatherDescription}`);
+    }
+    
+    return (
+      <Box>
+        {lines.map((line, index) => (
+          <Typography key={index} variant="body2" sx={{ fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
+            {line}
+          </Typography>
+        ))}
+      </Box>
+    );
+  };
   
   // Get the first day of the month and number of days
   const [year, monthNum] = monthKey.split('-');
@@ -131,11 +230,9 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
   // }
   
   // Calculate weather summary counts
-  const weatherCounts = { good: 0, okay: 0, bad: 0, missing: 0 };
+  const weatherCounts = { good: 0, okay: 0, bad: 0 };
   entries.forEach(entry => {
-    if (entry.rating === null) {
-      weatherCounts.missing++;
-    } else if (entry.rating in weatherCounts) {
+    if (entry.rating !== null && entry.rating in weatherCounts) {
       weatherCounts[entry.rating as keyof typeof weatherCounts]++;
     }
   });
@@ -153,41 +250,44 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
   // Add squares for each day of the month
   for (let day = 1; day <= daysInMonth; day++) {
     const dateString = `${year}-${monthNum.padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-    const entry = entriesMap.get(dateString);
-    const rating = entry?.rating;
-    const isToday = dateString === new Date().toISOString().split('T')[0];
-    const isFuture = new Date(dateString) > new Date();
+    const dayEntry = entriesMap.get(dateString);
+    const rating = dayEntry?.rating;
+    // Use browser timezone for date comparisons
+    const today = new Date();
+    const todayDateString = today.getFullYear() + '-' + 
+      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+      String(today.getDate()).padStart(2, '0');
     
-    const showDateLabel = !isFuture || entry; // Show date if it's not future OR if it has data
+    const isToday = dateString === todayDateString;
+    const isFuture = dateString > todayDateString;
+    
+    const showDateLabel = !isFuture || dayEntry; // Show date if it's not future OR if it has data
+    const tooltipContent = formatTooltipContent(dayEntry, dateString);
     
     calendarSquares.push(
-      <DaySquare 
-        key={day} 
-        rating={rating}
-        sx={{
-          border: isToday && rating ? '2px solid #1976d2' : 'none',
-        }}
-        title={(() => {
-          const entry = entriesMap.get(dateString);
-          if (!entry) return dateString;
-          
-          let tooltip = `${dateString}: ${entry.rating || 'No data'}`;
-          if (entry.maxTemp !== undefined) {
-            const maxTempF = Math.round((entry.maxTemp * 9/5) + 32);
-            tooltip += `\nMax: ${maxTempF}°F`;
-          }
-          if (entry.minTemp !== undefined) {
-            const minTempF = Math.round((entry.minTemp * 9/5) + 32);
-            tooltip += `\nMin: ${minTempF}°F`;
-          }
-          if (entry.precipitation !== undefined && entry.precipitation > 0) {
-            tooltip += `\nPrecip: ${entry.precipitation}mm`;
-          }
-          return tooltip;
-        })()}
+      <Tooltip 
+        key={day}
+        title={tooltipContent || dateString}
+        arrow
+        placement="top"
+        open={clickedDay === dateString ? true : undefined}
+        onClose={() => setClickedDay(null)}
       >
-        {showDateLabel ? day : ''}
-      </DaySquare>
+        <DaySquare 
+          rating={rating}
+          sx={{
+            border: isToday && rating ? '2px solid #1976d2' : 'none',
+            cursor: dayEntry ? 'pointer' : 'default',
+          }}
+          onClick={() => {
+            if (dayEntry) {
+              setClickedDay(clickedDay === dateString ? null : dateString);
+            }
+          }}
+        >
+          {showDateLabel ? day : ''}
+        </DaySquare>
+      </Tooltip>
     );
   }
 
@@ -200,6 +300,8 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
       mb: 3,
       boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
       border: '1px solid rgba(226, 232, 240, 0.4)',
+      maxWidth: '400px',
+      mx: 'auto',
     }}>
       <Typography 
         variant="h6" 
@@ -210,7 +312,7 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
           mb: 2, 
           fontWeight: 500,
           color: '#64748b',
-          fontSize: { xs: '1.1rem', sm: '1.2rem' }
+          fontSize: '1.125rem'
         }}
       >
         {month}
@@ -222,7 +324,7 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
         justifyContent: 'center', 
         gap: 3, 
         mb: 3,
-        fontSize: '0.85rem',
+        fontSize: '0.875rem',
         color: '#64748b'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -232,7 +334,7 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)'
           }} />
-          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+          <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
             Good: {weatherCounts.good}
           </Typography>
         </Box>
@@ -243,7 +345,7 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'
           }} />
-          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+          <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
             Okay: {weatherCounts.okay}
           </Typography>
         </Box>
@@ -254,23 +356,10 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
             borderRadius: '50%',
             background: 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
           }} />
-          <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
+          <Typography variant="body2" sx={{ fontSize: '0.875rem', fontWeight: 500 }}>
             Bad: {weatherCounts.bad}
           </Typography>
         </Box>
-        {weatherCounts.missing > 0 && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Box sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              background: 'rgba(156, 163, 175, 0.6)'
-            }} />
-            <Typography variant="body2" sx={{ fontSize: '0.85rem', fontWeight: 500 }}>
-              Missing: {weatherCounts.missing}
-            </Typography>
-          </Box>
-        )}
       </Box>
       
       <DayHeaders>

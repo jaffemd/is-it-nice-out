@@ -31,7 +31,7 @@ const theme = createTheme({
     MuiContainer: {
       styleOverrides: {
         root: {
-          maxWidth: '430px !important', // Updated max width
+          maxWidth: 'min(600px, 100vw) !important', // Responsive max width
           paddingLeft: '16px',
           paddingRight: '16px',
           margin: '0 auto', // Center the app

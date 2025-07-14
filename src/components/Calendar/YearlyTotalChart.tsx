@@ -65,7 +65,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
           textAlign: 'center', 
           mb: 2, 
           color: '#64748b',
-          fontSize: '0.875rem',
+          fontSize: '1rem',
           fontWeight: 500
         }}
       >
@@ -88,7 +88,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
               p: 3,
               textAlign: 'center',
               flex: 1,
-              maxWidth: '120px',
+              maxWidth: '200px',
               transition: 'all 0.2s ease',
               '&:hover': {
                 transform: 'translateY(-1px)',
@@ -99,7 +99,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
             <Typography 
               sx={{ 
                 color: '#64748b',
-                fontSize: '0.75rem',
+                fontSize: '0.875rem',
                 fontWeight: 500,
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
@@ -121,7 +121,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
             <Typography 
               sx={{ 
                 color: '#94a3b8',
-                fontSize: '0.6875rem',
+                fontSize: '0.875rem',
                 fontWeight: 500,
                 mt: 0.5
               }}
@@ -132,7 +132,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
               <Typography 
                 sx={{ 
                   color: '#94a3b8',
-                  fontSize: '0.625rem',
+                  fontSize: '0.75rem',
                   fontWeight: 400,
                   mt: 0.25
                 }}

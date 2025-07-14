@@ -10,7 +10,7 @@ const YearHeader: React.FC<YearHeaderProps> = ({ year }) => {
     <Box sx={{ 
       my: 4,
       mx: 'auto',
-      maxWidth: '430px',
+      maxWidth: 'min(600px, 100vw)',
       px: 2
     }}>
       <Box sx={{
@@ -30,7 +30,7 @@ const YearHeader: React.FC<YearHeaderProps> = ({ year }) => {
           sx={{
             fontWeight: 600,
             color: '#475569',
-            fontSize: { xs: '1.5rem', sm: '1.75rem' },
+            fontSize: '1.5rem',
             textAlign: 'center',
             px: 3,
             py: 1,

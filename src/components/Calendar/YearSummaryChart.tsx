@@ -34,7 +34,7 @@ const CustomTooltip: React.FC<TooltipProps> = ({ active, payload }) => {
         borderRadius: '4px',
         padding: '4px 8px',
         boxShadow: '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
-        fontSize: '0.875rem',
+        fontSize: '1rem',
         fontWeight: 600
       }}>
         {data.niceDays}
@@ -104,7 +104,7 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
           textAlign: 'center', 
           mb: 1, 
           color: '#64748b',
-          fontSize: '0.75rem',
+          fontSize: '0.875rem',
           fontWeight: 500
         }}
       >
