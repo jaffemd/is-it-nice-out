@@ -31,7 +31,6 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [displayCallCount, setDisplayCallCount] = useState(0); // For UI display only
   const [isRateLimited, setIsRateLimited] = useState(false);
   
   const debounceTimeoutRef = useRef<number | undefined>(undefined);
@@ -53,7 +52,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
         // Check API call limit using ref
         if (apiCallCountRef.current >= MAX_API_CALLS) {
           setIsRateLimited(true);
-          setError('Too many search requests. Please refresh the page to continue.');
+          setError('To protect against API limits, you\'re required to reload the page to continue searching.');
           return;
         }
 
@@ -75,7 +74,6 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
           
           // Increment API call counter using ref
           apiCallCountRef.current += 1;
-          setDisplayCallCount(apiCallCountRef.current);
           
           const response = await fetch(
             `https://api.radar.io/v1/search/autocomplete?query=${encodeURIComponent(query)}&country=US&limit=5`,
@@ -246,7 +244,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
           action={
             isRateLimited && (
               <Button color="inherit" size="small" onClick={handleRefresh}>
-                Refresh Page
+                Reload Page
               </Button>
             )
           }
@@ -268,18 +266,6 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
         </Typography>
       )}
       
-      {!isRateLimited && (
-        <Typography 
-          variant="caption" 
-          sx={{ 
-            color: '#64748b',
-            display: 'block',
-            mt: 2
-          }}
-        >
-          Searches remaining: {MAX_API_CALLS - displayCallCount}
-        </Typography>
-      )}
     </Box>
   );
 };
