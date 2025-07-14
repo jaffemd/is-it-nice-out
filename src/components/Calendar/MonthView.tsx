@@ -271,13 +271,25 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
         placement="top"
         open={clickedDay === dateString ? true : undefined}
         onClose={() => setClickedDay(null)}
+        disableHoverListener={false}
+        disableFocusListener={false}
+        disableTouchListener={false}
+        enterTouchDelay={0}
+        leaveTouchDelay={3000}
       >
         <DaySquare 
           rating={rating}
           sx={{
             cursor: dayEntry ? 'pointer' : 'default',
+            touchAction: 'manipulation', // Improve touch responsiveness
           }}
           onClick={() => {
+            if (dayEntry) {
+              setClickedDay(clickedDay === dateString ? null : dateString);
+            }
+          }}
+          onTouchStart={() => {
+            // Handle touch start for mobile
             if (dayEntry) {
               setClickedDay(clickedDay === dateString ? null : dateString);
             }
