@@ -59,7 +59,7 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
     
     // Count nice days (good + okay ratings)
     const niceDays = entries.filter(entry => 
-      entry.rating === 'good' || entry.rating === 'okay'
+      entry.rating === 'good'
     ).length;
     
     const totalDays = entries.filter(entry => entry.rating !== null).length;

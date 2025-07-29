@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React + TypeScript weather tracking application that allows users to log daily weather ratings ("good", "okay", "bad") and view them in a calendar format. The app asks "Was The Weather Nice Enough To Spend Time Outside?" and displays historical weather data grouped by month.
+This is a React + TypeScript historical weather tracking application that displays weather ratings ("good", "okay", "bad") in a calendar format. The app automatically calculates weather ratings based on temperature and weather conditions using real weather data from the Open-Meteo API.
 
 ## Development Commands
 
@@ -16,43 +16,90 @@ This is a React + TypeScript weather tracking application that allows users to l
 ## Architecture
 
 ### Frontend Structure
-- **Single Page Application** with single route:
-  - `/` - Calendar view (CalendarGrid component)
+- **Single Page Application** with conditional routing:
+  - Initial state: Location input screen (LocationInput component)
+  - After location selection: Calendar view (CalendarGrid component)
 
 ### Key Components
-- `CalendarGrid.tsx` - Main calendar view that fetches and displays weather data grouped by month
+- `LocationInput.tsx` - Location search with Radar API autocomplete integration
+- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout
 - `MonthView.tsx` - Individual month display component
-- `api.ts` - Data service layer for fetching and transforming static weather data
+- `YearHeader.tsx` - Year section headers in calendar
+- `YearSummaryChart.tsx` - Monthly summary charts for each year
+- `YearlyTotalChart.tsx` - Aggregated yearly statistics chart
+- `api.ts` - Data service layer for fetching and transforming Open-Meteo weather data
 
 ### Data Source
-- Uses static JSON file `default-weather-config.json` for weather data
-- Data is fetched and transformed client-side into calendar format
-- No backend API required
+- **Open-Meteo API** (https://archive-api.open-meteo.com) for historical weather data
+- **Radar API** for location autocomplete (requires API key)
+- Date range: January 1, 2023 to yesterday (most recent complete day)
+- Real-time weather rating calculation based on temperature and weather code algorithms
 
 ### Data Models
 ```typescript
 interface WeatherEntry {
   date: string;
-  rating: 'good' | 'bad' | 'okay';
+  rating: 'good' | 'okay' | 'bad' | null; // null for missing temperature data
+  maxTemp?: number;
+  minTemp?: number;
+  apparentTempMean?: number;
+  precipitation?: number;
+  snowfall?: number;
+  weatherCode?: number;
 }
 ```
 
+### Weather Rating Algorithm
+- **Bad**: maxTemp > 87°F, maxTemp < 50°F, apparent temp < 40°F or > 85°F, weather code > 63, freezing drizzle (56-57)
+- **Good**: maxTemp 57-82°F with clear/cloudy/fog conditions
+- **Okay**: maxTemp 50-57°F or 82-85°F, or good conditions downgraded by slight/moderate rain
+
 ### UI Framework
-- Material-UI (MUI) for components and theming
-- Mobile-first responsive design with max width of 430px
+- **Material-UI (MUI)** for components and theming
+- **Recharts** for data visualization
+- **TanStack Query** for data fetching and caching
+- Responsive design: single column mobile, two-column desktop (800px+ breakpoint)
 - Custom theme with blue primary color and yellow warning color for "okay" ratings
 
 ### State Management
 - React hooks for local component state
-- No global state management (Redux/Context) currently implemented
-- API data fetching with loading/error states
+- TanStack Query for server state management
+- Location selection state managed in App.tsx
+
+### Dependencies
+Key production dependencies:
+- `@mui/material`, `@mui/icons-material`, `@mui/x-date-pickers` - UI components
+- `@tanstack/react-query` - Data fetching and caching
+- `react-router-dom` - Client-side routing
+- `recharts` - Data visualization
+- `axios` - HTTP client
+- `date-fns` - Date utilities
+
+## Environment Configuration
+
+- `.env` file contains Radar API key: `VITE_RADAR_API_KEY`
+- Default fallback location: Chicago, IL (41.8781, -87.6298)
+
+## Persistent Location Storage
+
+- **localStorage Integration**: User's selected location is automatically saved to browser localStorage with key `'most-recent-location'`
+- **Automatic Loading**: On subsequent visits, users skip location input and go directly to weather view
+- **Storage Utility**: `src/utils/locationStorage.ts` provides type-safe localStorage operations with error handling
+- **Graceful Fallback**: App continues to work normally if localStorage is unavailable (private browsing, etc.)
+- **Data Validation**: Stored location data is validated for integrity and coordinate bounds
 
 ## Deployment
 
 - Configured for Render.com deployment via `render.yaml`
 - Static site deployment with build command `npm run build`
 - Includes `_redirects` file for client-side routing support
+- Build script: `render-build.sh`
 
-## Data Files
+## Important Instructions for Claude Code
 
-- `default-weather-config.json` - Contains sample weather data for the full year 2025 (appears to be seed/demo data)
+**ALWAYS check after every code edit**: Review both CLAUDE.md and README.md to determine if they need updates to reflect new features, architecture changes, or functionality. Update both files when:
+- New features are added (like persistent location storage)
+- Architecture or data flow changes
+- New dependencies or utilities are introduced  
+- User experience or interface changes
+- Development or deployment processes change

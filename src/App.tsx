@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
 import CalendarGrid from './components/Calendar/CalendarGrid';
 import LocationInput from './components/LocationInput';
+import { locationStorage } from './utils/locationStorage';
 
 // Create Material-UI theme with mobile-first approach
 const theme = createTheme({
@@ -55,13 +56,25 @@ interface SelectedLocation {
 }
 
 function App() {
-  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(() => {
+    // Initialize state from localStorage on first render
+    return locationStorage.load();
+  });
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    // Small delay to prevent flash of location input if location is loaded from storage
+    const timer = setTimeout(() => setIsInitializing(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLocationSelect = (location: SelectedLocation) => {
+    locationStorage.save(location);
     setSelectedLocation(location);
   };
 
   const handleStartOver = () => {
+    locationStorage.clear();
     setSelectedLocation(null);
   };
 
@@ -81,7 +94,15 @@ function App() {
           <Container maxWidth="sm">
             <Routes>
               <Route path="/" element={
-                selectedLocation ? (
+                isInitializing ? (
+                  // Show a brief loading state to prevent UI flash
+                  <Box sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    minHeight: '200px' 
+                  }} />
+                ) : selectedLocation ? (
                   <CalendarGrid 
                     onStartOver={handleStartOver}
                     locationName={selectedLocation.formattedAddress}

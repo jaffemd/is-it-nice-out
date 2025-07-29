@@ -26,6 +26,16 @@ interface LocationInputProps {
   onLocationSelect: (location: LocationSuggestion) => void;
 }
 
+interface RadarAddress {
+  formattedAddress?: string;
+  addressLabel?: string;
+  city?: string;
+  state?: string;
+  geometry?: {
+    coordinates?: [number, number]; // [longitude, latitude]
+  };
+}
+
 const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
@@ -92,7 +102,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
           const data = await response.json();
           
           if (data.addresses && Array.isArray(data.addresses)) {
-            const formattedSuggestions: LocationSuggestion[] = data.addresses.map((address: any) => ({
+            const formattedSuggestions: LocationSuggestion[] = data.addresses.map((address: RadarAddress) => ({
               id: address.geometry?.coordinates ? 
                 `${address.geometry.coordinates[1]},${address.geometry.coordinates[0]}` : 
                 Math.random().toString(),

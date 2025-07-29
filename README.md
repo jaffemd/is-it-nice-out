@@ -1,69 +1,72 @@
-# React + TypeScript + Vite
+# Historical Weather Simple Rating Tracker
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React + TypeScript application that displays historical weather data with automatic "good", "okay", or "bad" ratings based on temperature and weather conditions. View weather ratings in an intuitive calendar format with summary charts.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Location Search**: Search any US location using autocomplete
+- **Persistent Location**: Your selected location is remembered across browser sessions
+- **Historical Data**: View weather ratings from January 1, 2023 to present
+- **Smart Rating Algorithm**: Automatic weather rating based on temperature and weather codes
+- **Responsive Design**: Mobile-first with two-column desktop layout
+- **Interactive Charts**: Monthly summaries and yearly totals
+- **Real-time Data**: Fetches current weather data from Open-Meteo API
 
-## Expanding the ESLint configuration
+## Weather Rating Algorithm
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Good**: 57-82°F with clear/cloudy conditions
+- **Okay**: 50-57°F or 82-85°F, or good conditions with light rain
+- **Bad**: <50°F, >87°F, extreme apparent temps, heavy precipitation, or severe weather
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Setup
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+1. **Install dependencies**:
+   ```bash
+   npm install
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **Configure API key** (optional):
+   ```bash
+   # Copy .env file and add your Radar API key for location search
+   cp .env .env.local
+   # Edit VITE_RADAR_API_KEY in .env.local
+   ```
+   Without an API key, the app defaults to Chicago, IL.
+
+3. **Start development server**:
+   ```bash
+   npm run dev
+   ```
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run preview` - Preview production build
+
+## Tech Stack
+
+- **Frontend**: React 19, TypeScript, Vite
+- **UI**: Material-UI (MUI), Recharts
+- **Data**: TanStack Query, Open-Meteo API
+- **Deployment**: Render.com
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── Calendar/          # Calendar and chart components
+│   ├── Layout/            # Layout components
+│   └── LocationInput.tsx  # Location search
+├── services/
+│   └── api.ts            # Weather data fetching
+└── utils/
+    ├── dateUtils.ts      # Date utilities
+    └── locationStorage.ts # Persistent location storage
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Deployment
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Configured for Render.com with automatic builds from the main branch.
