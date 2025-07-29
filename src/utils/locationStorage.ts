@@ -14,20 +14,24 @@ export const STORAGE_KEY = 'most-recent-location';
  * Validates that a stored location object has all required properties
  */
 function isValidLocationData(data: unknown): data is StoredLocation {
+  if (!data || typeof data !== 'object' || data === null) {
+    return false;
+  }
+  
+  const obj = data as Record<string, unknown>;
+  
   return (
-    data &&
-    typeof data === 'object' &&
-    typeof data.id === 'string' &&
-    typeof data.formattedAddress === 'string' &&
-    typeof data.latitude === 'number' &&
-    typeof data.longitude === 'number' &&
-    typeof data.savedAt === 'string' &&
-    !isNaN(data.latitude) &&
-    !isNaN(data.longitude) &&
-    data.latitude >= -90 &&
-    data.latitude <= 90 &&
-    data.longitude >= -180 &&
-    data.longitude <= 180
+    typeof obj.id === 'string' &&
+    typeof obj.formattedAddress === 'string' &&
+    typeof obj.latitude === 'number' &&
+    typeof obj.longitude === 'number' &&
+    typeof obj.savedAt === 'string' &&
+    !isNaN(obj.latitude) &&
+    !isNaN(obj.longitude) &&
+    obj.latitude >= -90 &&
+    obj.latitude <= 90 &&
+    obj.longitude >= -180 &&
+    obj.longitude <= 180
   );
 }
 

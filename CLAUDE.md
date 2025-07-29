@@ -97,9 +97,13 @@ Key production dependencies:
 
 ## Important Instructions for Claude Code
 
-**ALWAYS check after every code edit**: Review both CLAUDE.md and README.md to determine if they need updates to reflect new features, architecture changes, or functionality. Update both files when:
-- New features are added (like persistent location storage)
-- Architecture or data flow changes
-- New dependencies or utilities are introduced  
-- User experience or interface changes
-- Development or deployment processes change
+**ALWAYS after every code edit**:
+1. **Validate code changes**: Run `npm run build` to ensure TypeScript compilation and build succeeds
+2. **Update documentation**: Review both CLAUDE.md and README.md to determine if they need updates to reflect new features, architecture changes, or functionality. Update both files when:
+   - New features are added (like persistent location storage)
+   - Architecture or data flow changes
+   - New dependencies or utilities are introduced  
+   - User experience or interface changes
+   - Development or deployment processes change
+
+**Never commit or present code that fails `npm run build`** - always fix TypeScript errors and build issues immediately.
