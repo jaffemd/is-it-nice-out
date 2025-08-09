@@ -16,9 +16,10 @@ This is a React + TypeScript historical weather tracking application that displa
 ## Architecture
 
 ### Frontend Structure
-- **Single Page Application** with conditional routing:
-  - Initial state: Location input screen (LocationInput component)
-  - After location selection: Calendar view (CalendarGrid component)
+- **Single Page Application** with conditional routing and shareable URLs:
+  - Initial state: Location input screen (LocationInput component) OR automatic location loading from URL
+  - After location selection: Calendar view (CalendarGrid component) with URL parameters
+  - **URL-driven persistence**: Location state is managed through URL query parameters (`?city=Chicago&state=IL`)
 
 ### Key Components
 - `LocationInput.tsx` - Location search with Radar API autocomplete integration
@@ -28,6 +29,8 @@ This is a React + TypeScript historical weather tracking application that displa
 - `YearSummaryChart.tsx` - Monthly summary charts for each year
 - `YearlyTotalChart.tsx` - Aggregated yearly statistics chart
 - `api.ts` - Data service layer for fetching and transforming Open-Meteo weather data
+- `urlParams.ts` - URL parameter management and dynamic page title updates
+- `locationResolver.ts` - Service for resolving city/state to coordinates via Radar API
 
 ### Data Source
 - **Open-Meteo API** (https://archive-api.open-meteo.com) for historical weather data
@@ -64,7 +67,8 @@ interface WeatherEntry {
 ### State Management
 - React hooks for local component state
 - TanStack Query for server state management
-- Location selection state managed in App.tsx
+- **URL-based location persistence**: Location state managed through URL query parameters
+- Dynamic page title updates based on selected location
 
 ### Dependencies
 Key production dependencies:
@@ -80,13 +84,16 @@ Key production dependencies:
 - `.env` file contains Radar API key: `VITE_RADAR_API_KEY`
 - Default fallback location: Chicago, IL (41.8781, -87.6298)
 
-## Persistent Location Storage
+## Shareable URLs and Location Persistence
 
-- **localStorage Integration**: User's selected location is automatically saved to browser localStorage with key `'most-recent-location'`
-- **Automatic Loading**: On subsequent visits, users skip location input and go directly to weather view
-- **Storage Utility**: `src/utils/locationStorage.ts` provides type-safe localStorage operations with error handling
-- **Graceful Fallback**: App continues to work normally if localStorage is unavailable (private browsing, etc.)
-- **Data Validation**: Stored location data is validated for integrity and coordinate bounds
+- **URL-Based Persistence**: Location data is stored in URL query parameters (`?city=Chicago&state=IL`) making weather views shareable
+- **Dynamic Page Titles**: Page title updates based on location:
+  - Default: `"Historical Weather Tracker"`
+  - With location: `"[City] Historical Weather"`
+- **URL Resolution**: On page load, city/state from URL is resolved to coordinates via Radar API
+- **Automatic Navigation**: Users with valid URL parameters skip location input and go directly to weather view
+- **Graceful Fallback**: When URL resolution fails (API issues, invalid location), users see location input screen
+- **URL Encoding**: Special characters in city/state names are properly URL-encoded and decoded
 
 ## Deployment
 
@@ -100,7 +107,7 @@ Key production dependencies:
 **ALWAYS after every code edit**:
 1. **Validate code changes**: Run `npm run build` to ensure TypeScript compilation and build succeeds
 2. **Update documentation**: Review both CLAUDE.md and README.md to determine if they need updates to reflect new features, architecture changes, or functionality. Update both files when:
-   - New features are added (like persistent location storage)
+   - New features are added (like shareable URLs and URL-based persistence)
    - Architecture or data flow changes
    - New dependencies or utilities are introduced  
    - User experience or interface changes

@@ -4,7 +4,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline, Container, Box } from '@mui/material';
 import CalendarGrid from './components/Calendar/CalendarGrid';
 import LocationInput from './components/LocationInput';
-import { locationStorage } from './utils/locationStorage';
+import { urlParams } from './utils/urlParams';
+import { locationResolver } from './services/locationResolver';
 
 // Create Material-UI theme with mobile-first approach
 const theme = createTheme({
@@ -56,25 +57,62 @@ interface SelectedLocation {
 }
 
 function App() {
-  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(() => {
-    // Initialize state from localStorage on first render
-    return locationStorage.load();
-  });
+  const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [loadingFromUrl, setLoadingFromUrl] = useState(false);
 
   useEffect(() => {
-    // Small delay to prevent flash of location input if location is loaded from storage
-    const timer = setTimeout(() => setIsInitializing(false), 100);
-    return () => clearTimeout(timer);
+    const initializeLocation = async () => {
+      // Only check URL parameters - no localStorage fallback
+      const urlLocation = urlParams.getLocationParams();
+      if (urlLocation) {
+        setLoadingFromUrl(true);
+        try {
+          const searchQuery = urlParams.buildSearchQuery(urlLocation);
+          const resolvedLocation = await locationResolver.resolveLocation(searchQuery);
+          if (resolvedLocation) {
+            setSelectedLocation(resolvedLocation);
+            urlParams.updatePageTitle(resolvedLocation.city);
+          } else {
+            // If URL resolution fails, show location input
+            setSelectedLocation(null);
+            urlParams.updatePageTitle();
+          }
+        } catch (error) {
+          console.warn('Failed to resolve location from URL:', error);
+          // If URL resolution fails, show location input
+          setSelectedLocation(null);
+          urlParams.updatePageTitle();
+        }
+        setLoadingFromUrl(false);
+      } else {
+        // No URL parameters, show location input
+        setSelectedLocation(null);
+        urlParams.updatePageTitle();
+      }
+      setIsInitializing(false);
+    };
+
+    initializeLocation();
   }, []);
 
   const handleLocationSelect = (location: SelectedLocation) => {
-    locationStorage.save(location);
+    // Update URL if city and state are available
+    if (location.city && location.state) {
+      urlParams.setLocationParams(location.city, location.state);
+      urlParams.updatePageTitle(location.city);
+    } else {
+      // If no city/state, clear URL params and rely on component state only
+      urlParams.clearLocationParams();
+      urlParams.updatePageTitle();
+    }
+    
     setSelectedLocation(location);
   };
 
   const handleStartOver = () => {
-    locationStorage.clear();
+    urlParams.clearLocationParams();
+    urlParams.updatePageTitle(); // Reset to default title
     setSelectedLocation(null);
   };
 
@@ -94,7 +132,7 @@ function App() {
           <Container maxWidth="sm">
             <Routes>
               <Route path="/" element={
-                isInitializing ? (
+                isInitializing || loadingFromUrl ? (
                   // Show a brief loading state to prevent UI flash
                   <Box sx={{ 
                     display: 'flex', 
