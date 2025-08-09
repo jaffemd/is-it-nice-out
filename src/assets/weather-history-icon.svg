@@ -1,0 +1,70 @@
+<svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+  <!-- Light blue background -->
+  <rect x="0" y="0" width="240" height="240" fill="#e0f2fe" rx="20"/>
+  
+  <!-- Calendar lower left -->
+  <rect x="60" y="100" width="75" height="85" fill="white" stroke="#334155" stroke-width="2.5" rx="6"/>
+  <rect x="60" y="100" width="75" height="23" fill="#10b981" rx="6"/>
+  <rect x="78" y="91" width="9" height="14" fill="#334155" rx="2"/>
+  <rect x="108" y="91" width="9" height="14" fill="#334155" rx="2"/>
+  
+  <!-- Calendar grid -->
+  <g stroke="#e2e8f0" stroke-width="1.5">
+    <line x1="60" y1="140" x2="135" y2="140"/>
+    <line x1="60" y1="160" x2="135" y2="160"/>
+    <line x1="85" y1="123" x2="85" y2="185"/>
+    <line x1="110" y1="123" x2="110" y2="185"/>
+  </g>
+  
+  <!-- Enhanced sun upper right -->
+  <!-- Outer glow/corona -->
+  <circle cx="145" cy="90" r="42" fill="#fed7aa" opacity="0.4"/>
+  
+  <!-- Main sun body with gradient -->
+  <defs>
+    <radialGradient id="sunGradient" cx="45%" cy="45%">
+      <stop offset="0%" style="stop-color:#fde047;stop-opacity:1" />
+      <stop offset="70%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  <circle cx="145" cy="90" r="38" fill="url(#sunGradient)" stroke="#f59e0b" stroke-width="2"/>
+  
+  <!-- Inner sun detail -->
+  <circle cx="145" cy="90" r="32" fill="#fde047" opacity="0.5"/>
+  
+  <!-- Enhanced sun rays - alternating lengths -->
+  <g stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round">
+    <!-- Long rays -->
+    <line x1="145" y1="42" x2="145" y2="52"/>
+    <line x1="193" y1="90" x2="183" y2="90"/>
+    <line x1="145" y1="138" x2="145" y2="128"/>
+    <line x1="97" y1="90" x2="107" y2="90"/>
+    
+    <!-- Diagonal long rays -->
+    <line x1="174" y1="61" x2="167" y2="68"/>
+    <line x1="174" y1="119" x2="167" y2="112"/>
+    <line x1="116" y1="119" x2="123" y2="112"/>
+    <line x1="116" y1="61" x2="123" y2="68"/>
+  </g>
+  
+  <!-- Shorter rays between the main rays -->
+  <g stroke="#fbbf24" stroke-width="2" stroke-linecap="round">
+    <line x1="160" y1="50" x2="158" y2="56"/>
+    <line x1="185" y1="75" x2="179" y2="77"/>
+    <line x1="185" y1="105" x2="179" y2="103"/>
+    <line x1="160" y1="130" x2="158" y2="124"/>
+    <line x1="130" y1="130" x2="132" y2="124"/>
+    <line x1="105" y1="105" x2="111" y2="103"/>
+    <line x1="105" y1="75" x2="111" y2="77"/>
+    <line x1="130" y1="50" x2="132" y2="56"/>
+  </g>
+  
+  <!-- Optional: subtle sun face for personality -->
+  <circle cx="135" cy="85" r="2.5" fill="#f59e0b" opacity="0.7"/>
+  <circle cx="155" cy="85" r="2.5" fill="#f59e0b" opacity="0.7"/>
+  <path d="M 135 95 Q 145 102 155 95" fill="none" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- Subtle highlight on sun -->
+  <ellipse cx="138" cy="75" rx="12" ry="8" fill="white" opacity="0.3"/>
+</svg>
