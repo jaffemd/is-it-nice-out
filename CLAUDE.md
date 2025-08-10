@@ -23,10 +23,10 @@ This is a React + TypeScript historical weather tracking application that displa
 
 ### Key Components
 - `LocationInput.tsx` - Location search with Radar API autocomplete integration
-- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout
+- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout and chart legend
 - `MonthView.tsx` - Individual month display component
 - `YearHeader.tsx` - Year section headers in calendar
-- `YearSummaryChart.tsx` - Monthly summary charts for each year
+- `YearSummaryChart.tsx` - **Line + bar combo charts** showing nice days (bars) and average high temperature (line) for each year
 - `YearlyTotalChart.tsx` - Aggregated yearly statistics chart
 - `api.ts` - Data service layer for fetching and transforming Open-Meteo weather data
 - `urlParams.ts` - URL parameter management and dynamic page title updates
@@ -59,10 +59,18 @@ interface WeatherEntry {
 
 ### UI Framework
 - **Material-UI (MUI)** for components and theming
-- **Recharts** for data visualization
+- **Recharts** for data visualization with ComposedChart (line + bar combination charts)
 - **TanStack Query** for data fetching and caching
 - Responsive design: single column mobile, two-column desktop (800px+ breakpoint)
 - Custom theme with blue primary color and yellow warning color for "okay" ratings
+
+### Chart Features
+- **YearSummaryChart**: Line + bar combo charts for each year
+  - **Bars**: Nice days count per month (color-coded by percentage: green 70%+, yellow 50-70%, orange 30-50%, red <30%)
+  - **Line**: Average high temperature per month (blue line with dots)
+  - **Dynamic Y-axis scaling**: Temperature range automatically adjusts to [min-5°F, max+5°F] for optimal resolution
+  - **Enhanced tooltips**: Show full month name + year (e.g., "January 2025") with black text
+- **Comprehensive legend**: Single legend explains both chart types and color meanings, positioned between yearly totals and monthly charts
 
 ### State Management
 - React hooks for local component state
@@ -107,10 +115,20 @@ Key production dependencies:
 **ALWAYS after every code edit**:
 1. **Validate code changes**: Run `npm run build` to ensure TypeScript compilation and build succeeds
 2. **Update documentation**: Review both CLAUDE.md and README.md to determine if they need updates to reflect new features, architecture changes, or functionality. Update both files when:
-   - New features are added (like shareable URLs and URL-based persistence)
+   - New features are added (like shareable URLs, URL-based persistence, or chart enhancements)
    - Architecture or data flow changes
    - New dependencies or utilities are introduced  
-   - User experience or interface changes
+   - User experience or interface changes (like chart type changes from dual bars to line+bar combo)
    - Development or deployment processes change
 
 **Never commit or present code that fails `npm run build`** - always fix TypeScript errors and build issues immediately.
+
+## Recent Major Updates
+
+**August 2025**: Enhanced YearSummaryChart with line + bar combo design:
+- Converted from dual bar charts to more readable line + bar combination
+- Temperature data now displayed as blue line with dots for better trend visualization  
+- Dynamic Y-axis scaling for temperature provides optimal resolution per year
+- Added comprehensive legend with chart type indicators and color scale explanations
+- Enhanced tooltips show full month names with year and uniform black text styling
+- Improved user experience with cleaner charts and better data interpretation

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
+import { ComposedChart, Bar, Line, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import type { CalendarData } from '../../services/api';
 
 interface YearSummaryChartProps {
@@ -13,31 +13,80 @@ interface MonthSummary {
   shortMonth: string;
   niceDays: number;
   totalDays: number;
+  avgHighTemp: number | null; // Average high temperature in Fahrenheit
 }
+
+// Calculate average high temperature for a set of weather entries
+const calculateAvgHighTemp = (entries: CalendarData[string]['entries']): number | null => {
+  const validTemps = entries
+    .map(entry => entry.maxTemp)
+    .filter((temp): temp is number => temp !== undefined);
+  
+  if (validTemps.length === 0) return null;
+  
+  // Convert to Fahrenheit if needed and calculate average (always display in °F)
+  const fahrenheitTemps = validTemps.map(temp => (temp * 9/5) + 32);
+  return fahrenheitTemps.reduce((sum, temp) => sum + temp, 0) / fahrenheitTemps.length;
+};
 
 // Custom tooltip component
 interface TooltipProps {
   active?: boolean;
   payload?: Array<{
-    payload: MonthSummary;
+    dataKey: string;
+    value: number;
+    payload: {
+      shortMonth: string;
+      niceDays: number;
+      avgHighTemp: number | null;
+      totalDays: number;
+    };
   }>;
+  year?: string;
 }
 
-const CustomTooltip: React.FC<TooltipProps> = ({ active, payload }) => {
+const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, year }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+    
+    // Convert short month to full month name
+    const monthNames = {
+      'Jan': 'January',
+      'Feb': 'February', 
+      'Mar': 'March',
+      'Apr': 'April',
+      'May': 'May',
+      'Jun': 'June',
+      'Jul': 'July',
+      'Aug': 'August',
+      'Sep': 'September',
+      'Oct': 'October',
+      'Nov': 'November',
+      'Dec': 'December'
+    };
+    
+    const fullMonthName = monthNames[data.shortMonth as keyof typeof monthNames] || data.shortMonth;
     
     return (
       <Box sx={{
         backgroundColor: 'white',
         border: '1px solid #e2e8f0',
         borderRadius: '4px',
-        padding: '4px 8px',
+        padding: '8px 12px',
         boxShadow: '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
-        fontSize: '1rem',
-        fontWeight: 600
+        fontSize: '0.875rem'
       }}>
-        {data.niceDays}
+        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'black' }}>
+          {fullMonthName} {year}
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'black' }}>
+          Nice Days: {data.niceDays}
+        </Typography>
+        {data.avgHighTemp !== null && data.avgHighTemp > 0 && (
+          <Typography variant="body2" sx={{ color: 'black' }}>
+            Avg High: {data.avgHighTemp}°F
+          </Typography>
+        )}
       </Box>
     );
   }
@@ -68,11 +117,15 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
     const monthName = monthData.month.split(' ')[0]; // "January 2025" -> "January"
     const shortMonth = monthName.substring(0, 3); // "January" -> "Jan"
     
+    // Calculate average high temperature for this month
+    const avgHighTemp = calculateAvgHighTemp(entries);
+    
     monthSummaries.push({
       month: monthName,
       shortMonth,
       niceDays,
-      totalDays
+      totalDays,
+      avgHighTemp
     });
   });
   
@@ -83,6 +136,29 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
   
   // Calculate max for scaling
   const maxNiceDays = Math.max(...monthSummaries.map(m => m.niceDays));
+  
+  // Transform data for grouped bars
+  const chartData = monthSummaries.map(summary => ({
+    shortMonth: summary.shortMonth,
+    niceDays: summary.niceDays,
+    avgHighTemp: summary.avgHighTemp ? Math.round(summary.avgHighTemp) : null,
+    totalDays: summary.totalDays, // Keep for color calculation
+  }));
+  
+  // Calculate dynamic temperature range
+  const validTemps = chartData
+    .map(d => d.avgHighTemp)
+    .filter((temp): temp is number => temp !== null);
+  
+  let tempDomain: [number, number];
+  if (validTemps.length === 0) {
+    // No temperature data for this year, use default range
+    tempDomain = [0, 100];
+  } else {
+    const tempMin = Math.min(...validTemps);
+    const tempMax = Math.max(...validTemps);
+    tempDomain = [Math.max(0, tempMin - 5), Math.min(120, tempMax + 5)];
+  }
   
   // Color function based on nice days ratio
   const getBarColor = (niceDays: number, totalDays: number) => {
@@ -136,8 +212,8 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
         }
       }}>
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart 
-            data={monthSummaries} 
+          <ComposedChart 
+            data={chartData} 
             margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
             tabIndex={-1}
             style={{ outline: 'none' }}
@@ -151,19 +227,40 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
               height={20}
             />
             <YAxis 
-              hide 
+              yAxisId="left"
+              orientation="left"
               domain={[0, Math.max(maxNiceDays, 10)]} 
+              hide
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }} />
-            <Bar dataKey="niceDays" radius={[2, 2, 0, 0]}>
-              {monthSummaries.map((entry, index) => (
+            <YAxis 
+              yAxisId="right"
+              orientation="right"
+              domain={tempDomain} 
+              hide
+            />
+            <Tooltip content={<CustomTooltip year={year} />} cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }} />
+            
+            {/* Nice Days Bar */}
+            <Bar yAxisId="left" dataKey="niceDays" radius={[2, 2, 0, 0]}>
+              {chartData.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
                   fill={getBarColor(entry.niceDays, entry.totalDays)}
                 />
               ))}
             </Bar>
-          </BarChart>
+            
+            {/* Average High Temperature Line */}
+            <Line 
+              yAxisId="right"
+              type="monotone"
+              dataKey="avgHighTemp" 
+              stroke="#1976d2"
+              strokeWidth={2}
+              dot={{ r: 3, fill: '#1976d2' }}
+              connectNulls={false}
+            />
+          </ComposedChart>
         </ResponsiveContainer>
       </Box>
       

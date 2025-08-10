@@ -111,43 +111,84 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
             mx: 'auto'
           }}>
             <YearlyTotalChart calendarData={calendarData} />
+            
+            {/* Chart Legend */}
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2, 
+              mt: 1,
+              mb: 2,
+              p: 2,
+              backgroundColor: 'rgba(248, 250, 252, 0.6)',
+              borderRadius: '8px',
+              border: '1px solid rgba(226, 232, 240, 0.3)',
+            }}>
+              {/* Chart Type Legend */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: 16, height: 12, bgcolor: '#22c55e', borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>
+                    Nice Days
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ 
+                    width: 16, 
+                    height: 2, 
+                    bgcolor: '#1976d2', 
+                    borderRadius: '1px',
+                    position: 'relative'
+                  }}>
+                    <Box sx={{
+                      width: 4,
+                      height: 4,
+                      bgcolor: '#1976d2',
+                      borderRadius: '50%',
+                      position: 'absolute',
+                      top: -1,
+                      left: 6
+                    }} />
+                  </Box>
+                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, ml: 0.5 }}>
+                    Avg High Temp
+                  </Typography>
+                </Box>
+              </Box>
+              
+              {/* Nice Days Color Scale */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: '#22c55e', borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    70%+
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: '#eab308', borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    50-70%
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: '#f97316', borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    30-50%
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: '#ef4444', borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    &lt;30%
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+            
             {sortedYears.map((year) => (
               <YearSummaryChart key={year} year={year} calendarData={calendarData} />
             ))}
-          </Box>
-          
-          {/* Single Legend */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: 2, 
-            mt: 3,
-            flexWrap: 'wrap'
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 12, height: 12, bgcolor: '#22c55e', borderRadius: '2px' }} />
-              <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b' }}>
-                70%+
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 12, height: 12, bgcolor: '#eab308', borderRadius: '2px' }} />
-              <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b' }}>
-                50-70%
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 12, height: 12, bgcolor: '#f97316', borderRadius: '2px' }} />
-              <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b' }}>
-                30-50%
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 12, height: 12, bgcolor: '#ef4444', borderRadius: '2px' }} />
-              <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b' }}>
-                &lt;30%
-              </Typography>
-            </Box>
           </Box>
         </Box>
       )}
