@@ -22,12 +22,14 @@ This is a React + TypeScript historical weather tracking application that displa
   - **URL-driven persistence**: Location state is managed through URL query parameters (`?city=Chicago&state=IL`)
 
 ### Key Components
-- `LocationInput.tsx` - Location search with Radar API autocomplete integration
-- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout and chart legend
-- `MonthView.tsx` - Individual month display component
-- `YearHeader.tsx` - Year section headers in calendar
+- `LocationInput.tsx` - Location search with Radar API autocomplete integration and theme toggle
+- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout, chart legend, and theme toggle
+- `MonthView.tsx` - Individual month display component with dark mode support
+- `YearHeader.tsx` - Year section headers in calendar with theme-aware styling
 - `YearSummaryChart.tsx` - **Line + bar combo charts** showing nice days (bars) and average high temperature (line) for each year
-- `YearlyTotalChart.tsx` - Aggregated yearly statistics chart
+- `YearlyTotalChart.tsx` - Aggregated yearly statistics chart with theme integration
+- `ThemeToggle.tsx` - Three-mode theme switcher (System → Light → Dark → System)
+- `ThemeContext.tsx` - Theme state management with localStorage persistence
 - `api.ts` - Data service layer for fetching and transforming Open-Meteo weather data
 - `urlParams.ts` - URL parameter management and dynamic page title updates
 - `locationResolver.ts` - Service for resolving city/state to coordinates via Radar API
@@ -58,24 +60,27 @@ interface WeatherEntry {
 - **Okay**: maxTemp 50-57°F or 82-85°F, or good conditions downgraded by slight/moderate rain
 
 ### UI Framework
-- **Material-UI (MUI)** for components and theming
+- **Material-UI (MUI)** for components and theming with **automatic dark mode support**
 - **Recharts** for data visualization with ComposedChart (line + bar combination charts)
 - **TanStack Query** for data fetching and caching
 - Responsive design: single column mobile, two-column desktop (800px+ breakpoint)
-- Custom theme with blue primary color and yellow warning color for "okay" ratings
+- **Dynamic theming**: Automatic system preference detection with manual toggle override
+- **Theme persistence**: User theme preference saved in localStorage
 
 ### Chart Features
 - **YearSummaryChart**: Line + bar combo charts for each year
   - **Bars**: Nice days count per month (color-coded by percentage: green 70%+, yellow 50-70%, orange 30-50%, red <30%)
-  - **Line**: Average high temperature per month (blue line with dots)
+  - **Line**: Average high temperature per month (theme-aware colors: medium gray in light mode, white in dark mode)
   - **Dynamic Y-axis scaling**: Temperature range automatically adjusts to [min-5°F, max+5°F] for optimal resolution
-  - **Enhanced tooltips**: Show full month name + year (e.g., "January 2025") with black text
+  - **Enhanced tooltips**: Show full month name + year (e.g., "January 2025") with theme-appropriate styling
+  - **Dark mode compatibility**: All chart elements automatically adapt colors for optimal contrast
 - **Comprehensive legend**: Single legend explains both chart types and color meanings, positioned between yearly totals and monthly charts
 
 ### State Management
 - React hooks for local component state
 - TanStack Query for server state management
 - **URL-based location persistence**: Location state managed through URL query parameters
+- **Theme state management**: React Context with localStorage persistence for theme preferences
 - Dynamic page title updates based on selected location
 
 ### Dependencies
@@ -125,10 +130,22 @@ Key production dependencies:
 
 ## Recent Major Updates
 
-**August 2025**: Enhanced YearSummaryChart with line + bar combo design:
+**August 2025**: Dark Mode Implementation & Enhanced Charts:
+
+**Dark Mode Features:**
+- **Automatic Detection**: App detects system `prefers-color-scheme` preference automatically
+- **Manual Override**: Three-mode theme toggle (System → Light → Dark → System) with intuitive icons
+- **Persistent Settings**: User theme preference saved in localStorage across sessions
+- **Complete Theme Integration**: All components, charts, and UI elements fully support both light and dark modes
+- **Accessibility Compliant**: WCAG AA contrast ratios maintained in both themes
+- **Gradient Backgrounds**: Custom light/dark gradient backgrounds for optimal visual appeal
+- **Weather Color Adaptation**: All weather rating colors optimized for visibility in both themes
+
+**Chart Enhancements:**
 - Converted from dual bar charts to more readable line + bar combination
-- Temperature data now displayed as blue line with dots for better trend visualization  
+- Temperature line colors: medium gray in light mode, white in dark mode for optimal contrast
 - Dynamic Y-axis scaling for temperature provides optimal resolution per year
 - Added comprehensive legend with chart type indicators and color scale explanations
-- Enhanced tooltips show full month names with year and uniform black text styling
+- Enhanced tooltips show full month names with year and theme-appropriate styling
+- All chart elements (backgrounds, grids, tooltips) automatically adapt to theme
 - Improved user experience with cleaner charts and better data interpretation

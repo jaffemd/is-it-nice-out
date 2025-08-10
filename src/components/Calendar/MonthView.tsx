@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, styled, Tooltip } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 
 interface MonthViewProps {
   monthKey: string;
@@ -37,10 +38,10 @@ const DayHeaders = styled(Box)(() => ({
   placeItems: 'center',
 }));
 
-const DayHeader = styled(Typography)(() => ({
+const DayHeader = styled(Typography)(({ theme }) => ({
   fontSize: '0.75rem',
   fontWeight: 600,
-  color: 'rgba(71, 85, 105, 0.7)',
+  color: theme.palette.text.secondary,
   textAlign: 'center',
   width: '35px',
 }));
@@ -60,29 +61,47 @@ const DaySquare = styled(Box)<{ rating?: 'good' | 'okay' | 'bad' | null; isEmpty
     };
   }
 
-  let backgroundColor = 'rgba(255, 255, 255, 0.4)'; // Default soft white
-  let borderColor = 'rgba(255, 255, 255, 0.3)';
+  // Get theme colors
+  const isDarkMode = theme.palette.mode === 'dark';
+  const goodColor = theme.customColors.good;
+  const okayColor = theme.customColors.okay;
+  const badColor = theme.customColors.bad;
+  
+  let backgroundColor = isDarkMode 
+    ? 'rgba(51, 65, 85, 0.4)' 
+    : 'rgba(255, 255, 255, 0.4)';
+  let borderColor = isDarkMode 
+    ? 'rgba(51, 65, 85, 0.3)' 
+    : 'rgba(255, 255, 255, 0.3)';
   
   switch (rating) {
     case 'good':
-      backgroundColor = 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)'; // Modern green gradient
-      borderColor = 'rgba(34, 197, 94, 0.3)';
+      backgroundColor = `linear-gradient(135deg, ${goodColor}dd 0%, ${goodColor} 100%)`;
+      borderColor = `${goodColor}4d`;
       break;
     case 'okay':
-      backgroundColor = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)'; // Modern yellow gradient
-      borderColor = 'rgba(245, 158, 11, 0.3)';
+      backgroundColor = `linear-gradient(135deg, ${okayColor}dd 0%, ${okayColor} 100%)`;
+      borderColor = `${okayColor}4d`;
       break;
     case 'bad':
-      backgroundColor = 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'; // Modern red gradient
-      borderColor = 'rgba(239, 68, 68, 0.3)';
+      backgroundColor = `linear-gradient(135deg, ${badColor}dd 0%, ${badColor} 100%)`;
+      borderColor = `${badColor}4d`;
       break;
     case null:
-      backgroundColor = 'rgba(156, 163, 175, 0.4)'; // Light gray for missing temperature data
-      borderColor = 'rgba(156, 163, 175, 0.3)';
+      backgroundColor = isDarkMode 
+        ? 'rgba(75, 85, 99, 0.4)' 
+        : 'rgba(156, 163, 175, 0.4)';
+      borderColor = isDarkMode 
+        ? 'rgba(75, 85, 99, 0.3)' 
+        : 'rgba(156, 163, 175, 0.3)';
       break;
     default:
-      backgroundColor = 'rgba(148, 163, 184, 0.6)'; // Medium gray for no data/future
-      borderColor = 'rgba(148, 163, 184, 0.4)';
+      backgroundColor = isDarkMode 
+        ? 'rgba(71, 85, 105, 0.6)' 
+        : 'rgba(148, 163, 184, 0.6)';
+      borderColor = isDarkMode 
+        ? 'rgba(71, 85, 105, 0.4)' 
+        : 'rgba(148, 163, 184, 0.4)';
   }
 
   return {
@@ -98,9 +117,17 @@ const DaySquare = styled(Box)<{ rating?: 'good' | 'okay' | 'bad' | null; isEmpty
     justifyContent: 'center',
     fontSize: '0.75rem',
     fontWeight: 600,
-    color: rating ? theme.palette.common.white : 'rgba(71, 85, 105, 0.6)',
+    color: rating 
+      ? theme.palette.common.white 
+      : theme.palette.text.secondary,
     cursor: 'default',
-    boxShadow: rating ? '0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)' : '0 2px 6px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+    boxShadow: rating 
+      ? (isDarkMode 
+          ? '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15)' 
+          : '0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2)')
+      : (isDarkMode 
+          ? '0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)' 
+          : '0 2px 6px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.3)'),
     backdropFilter: 'blur(8px)',
     transition: 'transform 0.1s ease-in-out',
     '&:hover': {
@@ -110,6 +137,7 @@ const DaySquare = styled(Box)<{ rating?: 'good' | 'okay' | 'bad' | null; isEmpty
 });
 
 const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
+  const theme = useTheme();
   const [clickedDay, setClickedDay] = useState<string | null>(null);
   
   // Create a map of entries by date for quick lookup
@@ -303,13 +331,17 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
 
   return (
     <Box sx={{
-      background: 'rgba(248, 250, 252, 0.8)',
+      background: theme.palette.mode === 'dark' 
+        ? 'rgba(30, 41, 59, 0.8)' 
+        : 'rgba(248, 250, 252, 0.8)',
       backdropFilter: 'blur(12px)',
       borderRadius: '20px',
       p: 3,
       mb: 3,
-      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08)',
-      border: '1px solid rgba(226, 232, 240, 0.4)',
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+        : '0 8px 32px rgba(0, 0, 0, 0.08)',
+      border: `1px solid ${theme.palette.divider}`,
       maxWidth: '400px',
       mx: 'auto',
     }}>
@@ -321,7 +353,7 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
         sx={{ 
           mb: 2, 
           fontWeight: 500,
-          color: '#64748b',
+          color: theme.palette.text.secondary,
           fontSize: '1.125rem'
         }}
       >
@@ -335,7 +367,7 @@ const MonthView: React.FC<MonthViewProps> = ({ monthKey, month, entries }) => {
         gap: 3, 
         mb: 3,
         fontSize: '0.875rem',
-        color: '#64748b'
+        color: theme.palette.text.secondary
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box sx={{

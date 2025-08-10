@@ -12,6 +12,8 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import ThemeToggle from './ThemeToggle';
 
 interface LocationSuggestion {
   id: string;
@@ -37,6 +39,7 @@ interface RadarAddress {
 }
 
 const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
+  const theme = useTheme();
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -164,23 +167,25 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
       textAlign: 'center'
     }}>
       {/* App Title */}
-      <Typography 
-        variant="h5" 
-        component="h1" 
-        sx={{ 
-          fontWeight: 400,
-          color: '#4a5568',
-          fontSize: '1.5rem',
-          mb: 4
-        }}
-      >
-        Historical Weather Simple Rating Tracker
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 4 }}>
+        <Typography 
+          variant="h5" 
+          component="h1" 
+          sx={{ 
+            fontWeight: 400,
+            color: theme.palette.text.primary,
+            fontSize: '1.5rem'
+          }}
+        >
+          Historical Weather Simple Rating Tracker
+        </Typography>
+        <ThemeToggle />
+      </Box>
       
       <Typography 
         variant="body1" 
         sx={{ 
-          color: '#64748b',
+          color: theme.palette.text.secondary,
           mb: 4
         }}
       >
@@ -229,7 +234,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
                     onClick={() => handleLocationSelect(suggestion)}
                     sx={{
                       '&:hover': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        backgroundColor: theme.palette.action.hover,
                       }
                     }}
                   >
@@ -268,7 +273,7 @@ const LocationInput: React.FC<LocationInputProps> = ({ onLocationSelect }) => {
         <Typography 
           variant="caption" 
           sx={{ 
-            color: '#64748b',
+            color: theme.palette.text.secondary,
             display: 'block',
             mt: 1
           }}

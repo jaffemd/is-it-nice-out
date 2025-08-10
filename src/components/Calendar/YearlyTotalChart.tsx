@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import type { CalendarData } from '../../services/api';
 
 interface YearlyTotalChartProps {
@@ -13,6 +14,8 @@ interface YearSummary {
 }
 
 const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => {
+  const theme = useTheme();
+  
   // Calculate nice days per year
   const yearSummaries: YearSummary[] = [];
   
@@ -64,7 +67,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
         sx={{ 
           textAlign: 'center', 
           mb: 2, 
-          color: '#64748b',
+          color: theme.palette.text.secondary,
           fontSize: '1rem',
           fontWeight: 500
         }}
@@ -81,10 +84,12 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
           <Box 
             key={yearData.year}
             sx={{
-              background: 'white',
+              background: theme.palette.background.paper,
               borderRadius: '12px',
-              border: '1px solid rgba(226, 232, 240, 0.4)',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.04)',
+              border: `1px solid ${theme.palette.divider}`,
+              boxShadow: theme.palette.mode === 'dark'
+                ? '0 2px 4px rgba(0, 0, 0, 0.2)'
+                : '0 2px 4px rgba(0, 0, 0, 0.04)',
               p: 3,
               textAlign: 'center',
               flex: 1,
@@ -92,13 +97,15 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
               transition: 'all 0.2s ease',
               '&:hover': {
                 transform: 'translateY(-1px)',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.08)'
+                boxShadow: theme.palette.mode === 'dark'
+                  ? '0 4px 8px rgba(0, 0, 0, 0.3)'
+                  : '0 4px 8px rgba(0, 0, 0, 0.08)'
               }
             }}
           >
             <Typography 
               sx={{ 
-                color: '#64748b',
+                color: theme.palette.text.secondary,
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 textTransform: 'uppercase',
@@ -111,7 +118,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
             <Typography 
               sx={{ 
                 fontWeight: 700,
-                color: '#22c55e',
+                color: theme.customColors.good,
                 fontSize: '2rem',
                 lineHeight: 1
               }}
@@ -120,7 +127,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
             </Typography>
             <Typography 
               sx={{ 
-                color: '#94a3b8',
+                color: theme.palette.text.secondary,
                 fontSize: '0.875rem',
                 fontWeight: 500,
                 mt: 0.5
@@ -131,7 +138,7 @@ const YearlyTotalChart: React.FC<YearlyTotalChartProps> = ({ calendarData }) => 
             {yearData.year === '2025' && (
               <Typography 
                 sx={{ 
-                  color: '#94a3b8',
+                  color: theme.palette.text.secondary,
                   fontSize: '0.75rem',
                   fontWeight: 400,
                   mt: 0.25

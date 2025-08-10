@@ -6,46 +6,66 @@ import CalendarGrid from './components/Calendar/CalendarGrid';
 import LocationInput from './components/LocationInput';
 import { urlParams } from './utils/urlParams';
 import { locationResolver } from './services/locationResolver';
+import { WeatherThemeProvider, useWeatherTheme } from './contexts/ThemeContext';
 
-// Create Material-UI theme with mobile-first approach
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
+// Weather rating colors hook
+const useWeatherColors = (isDarkMode: boolean) => ({
+  good: isDarkMode ? '#4ade80' : '#22c55e',    // Lighter green for dark mode
+  okay: isDarkMode ? '#facc15' : '#eab308',    // Lighter yellow for dark mode
+  bad: isDarkMode ? '#f87171' : '#ef4444',     // Lighter red for dark mode
+  neutral: isDarkMode ? '#94a3b8' : '#64748b', // Lighter gray for dark mode
+  orange: isDarkMode ? '#fb923c' : '#f97316',  // Orange for 30-50% range
+});
+
+// Theme creation hook
+const useAppTheme = () => {
+  const { isDarkMode } = useWeatherTheme();
+  const weatherColors = useWeatherColors(isDarkMode);
+
+  return createTheme({
+    palette: {
+      mode: isDarkMode ? 'dark' : 'light',
+      primary: {
+        main: '#1976d2',
+      },
+      warning: {
+        main: isDarkMode ? '#facc15' : '#FFD700',
+      },
+      background: {
+        default: isDarkMode ? '#0f172a' : '#f8fafc',
+      },
     },
-    warning: {
-      main: '#FFD700', // Yellow for "okay" weather instead of orange
+    typography: {
+      fontFamily: [
+        'Inter',
+        '-apple-system',
+        'BlinkMacSystemFont',
+        '"Segoe UI"',
+        'Roboto',
+        '"Helvetica Neue"',
+        'Arial',
+        'sans-serif',
+      ].join(','),
     },
-  },
-  typography: {
-    fontFamily: [
-      'Inter',
-      '-apple-system',
-      'BlinkMacSystemFont',
-      '"Segoe UI"',
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-    ].join(','),
-  },
-  components: {
-    MuiContainer: {
-      styleOverrides: {
-        root: {
-          maxWidth: 'min(600px, 100vw) !important', // Default max width for single column
-          paddingLeft: '16px',
-          paddingRight: '16px',
-          margin: '0 auto', // Center the app
-          '@media (min-width: 800px)': {
-            maxWidth: 'min(1200px, 100vw) !important', // Two column layout width
-          }
+    components: {
+      MuiContainer: {
+        styleOverrides: {
+          root: {
+            maxWidth: 'min(600px, 100vw) !important',
+            paddingLeft: '16px',
+            paddingRight: '16px',
+            margin: '0 auto',
+            '@media (min-width: 800px)': {
+              maxWidth: 'min(1200px, 100vw) !important',
+            }
+          },
         },
       },
     },
-  },
-});
+    // Custom properties for weather colors
+    customColors: weatherColors,
+  });
+};
 
 interface SelectedLocation {
   id: string;
@@ -56,7 +76,10 @@ interface SelectedLocation {
   state?: string;
 }
 
-function App() {
+// Main app component with theme integration
+const AppContent = () => {
+  const theme = useAppTheme();
+  const { isDarkMode } = useWeatherTheme();
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [loadingFromUrl, setLoadingFromUrl] = useState(false);
@@ -116,6 +139,10 @@ function App() {
     setSelectedLocation(null);
   };
 
+  const backgroundGradient = isDarkMode 
+    ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+    : 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -123,7 +150,7 @@ function App() {
         <Box sx={{ 
           minHeight: '100vh',
           width: '100vw',
-          background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+          background: backgroundGradient,
           padding: '20px 0',
           display: 'flex',
           justifyContent: 'center',
@@ -158,6 +185,15 @@ function App() {
         </Box>
       </Router>
     </ThemeProvider>
+  );
+};
+
+// App wrapper with theme provider
+function App() {
+  return (
+    <WeatherThemeProvider>
+      <AppContent />
+    </WeatherThemeProvider>
   );
 }
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { ComposedChart, Bar, Line, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip } from 'recharts';
 import type { CalendarData } from '../../services/api';
 
@@ -46,6 +47,8 @@ interface TooltipProps {
 }
 
 const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, year }) => {
+  const theme = useTheme();
+  
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     
@@ -69,21 +72,23 @@ const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, year }) => {
     
     return (
       <Box sx={{
-        backgroundColor: 'white',
-        border: '1px solid #e2e8f0',
+        backgroundColor: theme.palette.background.paper,
+        border: `1px solid ${theme.palette.divider}`,
         borderRadius: '4px',
         padding: '8px 12px',
-        boxShadow: '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
+        boxShadow: theme.palette.mode === 'dark'
+          ? '0 2px 4px -1px rgba(0, 0, 0, 0.3)'
+          : '0 2px 4px -1px rgba(0, 0, 0, 0.1)',
         fontSize: '0.875rem'
       }}>
-        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: 'black' }}>
+        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5, color: theme.palette.text.primary }}>
           {fullMonthName} {year}
         </Typography>
-        <Typography variant="body2" sx={{ color: 'black' }}>
+        <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
           Nice Days: {data.niceDays}
         </Typography>
         {data.avgHighTemp !== null && data.avgHighTemp > 0 && (
-          <Typography variant="body2" sx={{ color: 'black' }}>
+          <Typography variant="body2" sx={{ color: theme.palette.text.primary }}>
             Avg High: {data.avgHighTemp}°F
           </Typography>
         )}
@@ -94,6 +99,8 @@ const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, year }) => {
 };
 
 const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData }) => {
+  const theme = useTheme();
+  
   // Calculate nice days per month for the given year
   const monthSummaries: MonthSummary[] = [];
   
@@ -162,12 +169,12 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
   
   // Color function based on nice days ratio
   const getBarColor = (niceDays: number, totalDays: number) => {
-    if (totalDays === 0) return '#e2e8f0'; // Light gray for no data
+    if (totalDays === 0) return theme.palette.mode === 'dark' ? '#374151' : '#e2e8f0'; // Gray for no data
     const ratio = niceDays / totalDays;
-    if (ratio >= 0.7) return '#22c55e'; // Green for 70%+ nice days
-    if (ratio >= 0.5) return '#eab308'; // Yellow for 50-70% nice days
-    if (ratio >= 0.3) return '#f97316'; // Orange for 30-50% nice days
-    return '#ef4444'; // Red for <30% nice days
+    if (ratio >= 0.7) return theme.customColors.good;  // Green for 70%+ nice days
+    if (ratio >= 0.5) return theme.customColors.okay;  // Yellow for 50-70% nice days
+    if (ratio >= 0.3) return theme.customColors.orange; // Orange for 30-50% nice days
+    return theme.customColors.bad;   // Red for <30% nice days
   };
   
   return (
@@ -179,7 +186,7 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
         sx={{ 
           textAlign: 'center', 
           mb: 1, 
-          color: '#64748b',
+          color: theme.palette.text.secondary,
           fontSize: '0.875rem',
           fontWeight: 500
         }}
@@ -189,9 +196,13 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
       
       <Box sx={{
         height: 100,
-        background: 'rgba(248, 250, 252, 0.6)',
+        background: theme.palette.mode === 'dark' 
+          ? 'rgba(30, 41, 59, 0.6)'
+          : 'rgba(248, 250, 252, 0.6)',
         borderRadius: '8px',
-        border: '1px solid rgba(226, 232, 240, 0.3)',
+        border: theme.palette.mode === 'dark'
+          ? '1px solid rgba(71, 85, 105, 0.3)'
+          : '1px solid rgba(226, 232, 240, 0.3)',
         p: 1,
         '& .recharts-bar-rectangle': {
           outline: 'none !important'
@@ -222,7 +233,7 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
               dataKey="shortMonth" 
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: '#64748b' }}
+              tick={{ fontSize: 11, fill: theme.palette.text.secondary }}
               interval={0}
               height={20}
             />
@@ -238,7 +249,14 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
               domain={tempDomain} 
               hide
             />
-            <Tooltip content={<CustomTooltip year={year} />} cursor={{ fill: 'rgba(0, 0, 0, 0.1)' }} />
+            <Tooltip 
+              content={<CustomTooltip year={year} />} 
+              cursor={{ 
+                fill: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.1)' 
+                  : 'rgba(0, 0, 0, 0.1)' 
+              }} 
+            />
             
             {/* Nice Days Bar */}
             <Bar yAxisId="left" dataKey="niceDays" radius={[2, 2, 0, 0]}>
@@ -255,9 +273,9 @@ const YearSummaryChart: React.FC<YearSummaryChartProps> = ({ year, calendarData 
               yAxisId="right"
               type="monotone"
               dataKey="avgHighTemp" 
-              stroke="#1976d2"
+              stroke={theme.palette.mode === 'dark' ? '#ffffff' : '#6b7280'}
               strokeWidth={2}
-              dot={{ r: 3, fill: '#1976d2' }}
+              dot={{ r: 3, fill: theme.palette.mode === 'dark' ? '#ffffff' : '#6b7280' }}
               connectNulls={false}
             />
           </ComposedChart>

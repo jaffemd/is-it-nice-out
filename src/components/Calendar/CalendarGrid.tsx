@@ -1,11 +1,13 @@
 import React from 'react';
 import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
 import MonthView from './MonthView';
 import YearHeader from './YearHeader';
 import YearSummaryChart from './YearSummaryChart';
 import YearlyTotalChart from './YearlyTotalChart';
+import ThemeToggle from '../ThemeToggle';
 
 interface CalendarGridProps {
   onStartOver?: () => void;
@@ -14,6 +16,7 @@ interface CalendarGridProps {
 }
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, coordinates }) => {
+  const theme = useTheme();
   const { 
     data: calendarData = {}, 
     isLoading: loading, 
@@ -36,23 +39,26 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
           mb: 3,
           pt: 2
         }}>
-          <Typography 
-            variant="h5" 
-            component="h1" 
-            sx={{ 
-              fontWeight: 400,
-              color: '#4a5568',
-              fontSize: '1.5rem'
-            }}
-          >
-            Historical Weather Simple Rating Tracker
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+            <Typography 
+              variant="h5" 
+              component="h1" 
+              sx={{ 
+                fontWeight: 400,
+                color: theme.palette.text.primary,
+                fontSize: '1.5rem'
+              }}
+            >
+              Historical Weather Simple Rating Tracker
+            </Typography>
+            <ThemeToggle />
+          </Box>
           <Typography 
             variant="h6" 
             component="h2" 
             sx={{ 
               fontWeight: 300,
-              color: '#64748b',
+              color: theme.palette.text.secondary,
               fontSize: '1.125rem',
               mt: 1
             }}
@@ -121,15 +127,19 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
               mt: 1,
               mb: 2,
               p: 2,
-              backgroundColor: 'rgba(248, 250, 252, 0.6)',
+              backgroundColor: theme.palette.mode === 'dark' 
+                ? 'rgba(30, 41, 59, 0.6)' 
+                : 'rgba(248, 250, 252, 0.6)',
               borderRadius: '8px',
-              border: '1px solid rgba(226, 232, 240, 0.3)',
+              border: theme.palette.mode === 'dark'
+                ? '1px solid rgba(71, 85, 105, 0.3)'
+                : '1px solid rgba(226, 232, 240, 0.3)',
             }}>
               {/* Chart Type Legend */}
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 16, height: 12, bgcolor: '#22c55e', borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500 }}>
+                  <Box sx={{ width: 16, height: 12, bgcolor: theme.customColors.good, borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: theme.palette.text.secondary, fontWeight: 500 }}>
                     Nice Days
                   </Typography>
                 </Box>
@@ -137,21 +147,21 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
                   <Box sx={{ 
                     width: 16, 
                     height: 2, 
-                    bgcolor: '#1976d2', 
+                    bgcolor: theme.palette.primary.main, 
                     borderRadius: '1px',
                     position: 'relative'
                   }}>
                     <Box sx={{
                       width: 4,
                       height: 4,
-                      bgcolor: '#1976d2',
+                      bgcolor: theme.palette.primary.main,
                       borderRadius: '50%',
                       position: 'absolute',
                       top: -1,
                       left: 6
                     }} />
                   </Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: '#64748b', fontWeight: 500, ml: 0.5 }}>
+                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: theme.palette.text.secondary, fontWeight: 500, ml: 0.5 }}>
                     Avg High Temp
                   </Typography>
                 </Box>
@@ -160,26 +170,26 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
               {/* Nice Days Color Scale */}
               <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: '#22c55e', borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.good, borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
                     70%+
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: '#eab308', borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.okay, borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
                     50-70%
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: '#f97316', borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.orange, borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
                     30-50%
                   </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: '#ef4444', borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.bad, borderRadius: '2px' }} />
+                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
                     &lt;30%
                   </Typography>
                 </Box>
@@ -252,23 +262,26 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
         mb: 3,
         pt: 2
       }}>
-        <Typography 
-          variant="h5" 
-          component="h1" 
-          sx={{ 
-            fontWeight: 400,
-            color: '#4a5568',
-            fontSize: '1.5rem'
-          }}
-        >
-          Historical Weather Simple Rating Tracker
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+          <Typography 
+            variant="h5" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 400,
+              color: theme.palette.text.primary,
+              fontSize: '1.5rem'
+            }}
+          >
+            Historical Weather Simple Rating Tracker
+          </Typography>
+          <ThemeToggle />
+        </Box>
         <Typography 
           variant="h6" 
           component="h2" 
           sx={{ 
             fontWeight: 300,
-            color: '#64748b',
+            color: theme.palette.text.secondary,
             fontSize: '1.125rem',
             mt: 1
           }}
