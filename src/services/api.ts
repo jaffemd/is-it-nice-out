@@ -90,8 +90,8 @@ function calculateWeatherRating(
 /**
  * Fetch weather data from Open-Meteo API for specified coordinates
  */
-export const fetchWeatherData = async (coordinates?: { latitude: number; longitude: number }): Promise<CalendarData> => {
-  const { startDate, endDate } = getWeatherDateRange();
+export const fetchWeatherData = async (coordinates?: { latitude: number; longitude: number }, startYear?: number): Promise<CalendarData> => {
+  const { startDate, endDate } = getWeatherDateRange(startYear);
   const { latitude, longitude } = coordinates || getChicagoCoordinates();
   
   const url = `https://archive-api.open-meteo.com/v1/archive?` +

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, Button, Select, MenuItem, FormControl } from '@mui/material';
+import type { SelectChangeEvent } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useQuery } from '@tanstack/react-query';
 import { getCalendarData } from '../../services/api';
@@ -15,16 +16,36 @@ interface CalendarGridProps {
   coordinates?: { latitude: number; longitude: number };
 }
 
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const currentYear = new Date().getFullYear();
+const DEFAULT_START_YEAR = currentYear - 2;
+const MIN_START_YEAR = currentYear - 9;
+
 const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, coordinates }) => {
   const theme = useTheme();
-  const { 
-    data: calendarData = {}, 
-    isLoading: loading, 
+  const [selectedMonth, setSelectedMonth] = React.useState<string>('');
+  const [startYear, setStartYear] = React.useState<number>(DEFAULT_START_YEAR);
+
+  const handleMonthChange = (event: SelectChangeEvent) => {
+    setSelectedMonth(event.target.value);
+  };
+
+  const handleStartYearChange = (event: SelectChangeEvent<number>) => {
+    setStartYear(event.target.value as number);
+  };
+
+  const {
+    data: calendarData = {},
+    isLoading: loading,
     error,
-    isError 
+    isError
   } = useQuery({
-    queryKey: ['weatherData', coordinates?.latitude, coordinates?.longitude],
-    queryFn: () => getCalendarData(coordinates),
+    queryKey: ['weatherData', coordinates?.latitude, coordinates?.longitude, startYear],
+    queryFn: () => getCalendarData(coordinates, startYear),
     refetchOnWindowFocus: true,
     retry: 2,
     retryDelay: 1000,
@@ -85,8 +106,15 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
     );
   }
 
+  // Filter calendar data by selected month
+  const filteredCalendarData = selectedMonth
+    ? Object.fromEntries(
+        Object.entries(calendarData).filter(([key]) => key.endsWith(`-${selectedMonth}`))
+      ) as typeof calendarData
+    : calendarData;
+
   // Sort months chronologically (newest first)
-  const sortedMonths = Object.keys(calendarData)
+  const sortedMonths = Object.keys(filteredCalendarData)
     .sort((a, b) => new Date(b + '-01').getTime() - new Date(a + '-01').getTime());
 
   // Group months by year for year headers
@@ -108,97 +136,101 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
     <>
       {/* Year Summary Charts */}
       {sortedMonths.length > 0 && (
-        <Box sx={{ mb: 4 }}>
-          <Box sx={{ 
-            display: 'flex', 
+        <Box sx={{ mb: selectedMonth ? 2 : 4 }}>
+          <Box sx={{
+            display: 'flex',
             flexDirection: 'column',
-            gap: 2, 
+            gap: 2,
             maxWidth: '100%',
             mx: 'auto'
           }}>
-            <YearlyTotalChart calendarData={calendarData} />
-            
-            {/* Chart Legend */}
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 2, 
-              mt: 1,
-              mb: 2,
-              p: 2,
-              backgroundColor: theme.palette.mode === 'dark' 
-                ? 'rgba(30, 41, 59, 0.6)' 
-                : 'rgba(248, 250, 252, 0.6)',
-              borderRadius: '8px',
-              border: theme.palette.mode === 'dark'
-                ? '1px solid rgba(71, 85, 105, 0.3)'
-                : '1px solid rgba(226, 232, 240, 0.3)',
-            }}>
-              {/* Chart Type Legend */}
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 16, height: 12, bgcolor: theme.customColors.good, borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: theme.palette.text.secondary, fontWeight: 500 }}>
-                    Nice Days
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ 
-                    width: 16, 
-                    height: 2, 
-                    bgcolor: theme.palette.primary.main, 
-                    borderRadius: '1px',
-                    position: 'relative'
-                  }}>
-                    <Box sx={{
-                      width: 4,
-                      height: 4,
-                      bgcolor: theme.palette.primary.main,
-                      borderRadius: '50%',
-                      position: 'absolute',
-                      top: -1,
-                      left: 6
-                    }} />
+            <YearlyTotalChart calendarData={filteredCalendarData} />
+
+            {!selectedMonth && (
+              <>
+                {/* Chart Legend */}
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 2,
+                  mt: 1,
+                  mb: 2,
+                  p: 2,
+                  backgroundColor: theme.palette.mode === 'dark'
+                    ? 'rgba(30, 41, 59, 0.6)'
+                    : 'rgba(248, 250, 252, 0.6)',
+                  borderRadius: '8px',
+                  border: theme.palette.mode === 'dark'
+                    ? '1px solid rgba(71, 85, 105, 0.3)'
+                    : '1px solid rgba(226, 232, 240, 0.3)',
+                }}>
+                  {/* Chart Type Legend */}
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, flexWrap: 'wrap' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 16, height: 12, bgcolor: theme.customColors.good, borderRadius: '2px' }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.875rem', color: theme.palette.text.secondary, fontWeight: 500 }}>
+                        Nice Days
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{
+                        width: 16,
+                        height: 2,
+                        bgcolor: theme.palette.primary.main,
+                        borderRadius: '1px',
+                        position: 'relative'
+                      }}>
+                        <Box sx={{
+                          width: 4,
+                          height: 4,
+                          bgcolor: theme.palette.primary.main,
+                          borderRadius: '50%',
+                          position: 'absolute',
+                          top: -1,
+                          left: 6
+                        }} />
+                      </Box>
+                      <Typography variant="caption" sx={{ fontSize: '0.875rem', color: theme.palette.text.secondary, fontWeight: 500, ml: 0.5 }}>
+                        Avg High Temp
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Typography variant="caption" sx={{ fontSize: '0.875rem', color: theme.palette.text.secondary, fontWeight: 500, ml: 0.5 }}>
-                    Avg High Temp
-                  </Typography>
+
+                  {/* Nice Days Color Scale */}
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.good, borderRadius: '2px' }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                        70%+
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.okay, borderRadius: '2px' }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                        50-70%
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.orange, borderRadius: '2px' }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                        30-50%
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.bad, borderRadius: '2px' }} />
+                      <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
+                        &lt;30%
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-              
-              {/* Nice Days Color Scale */}
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.good, borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
-                    70%+
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.okay, borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
-                    50-70%
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.orange, borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
-                    30-50%
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Box sx={{ width: 12, height: 12, bgcolor: theme.customColors.bad, borderRadius: '2px' }} />
-                  <Typography variant="caption" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
-                    &lt;30%
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-            
-            {sortedYears.map((year) => (
-              <YearSummaryChart key={year} year={year} calendarData={calendarData} />
-            ))}
+
+                {sortedYears.map((year) => (
+                  <YearSummaryChart key={year} year={year} calendarData={filteredCalendarData} />
+                ))}
+              </>
+            )}
           </Box>
         </Box>
       )}
@@ -239,13 +271,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
       ) : (
         sortedYears.map((year) => (
           <React.Fragment key={year}>
-            <YearHeader year={year} />
+            {!selectedMonth && <YearHeader year={year} />}
             {monthsByYear[year].map((monthKey) => (
-              <MonthView 
+              <MonthView
                 key={monthKey}
                 monthKey={monthKey}
-                month={calendarData[monthKey].month}
-                entries={calendarData[monthKey].entries}
+                month={filteredCalendarData[monthKey].month}
+                entries={filteredCalendarData[monthKey].entries}
               />
             ))}
           </React.Fragment>
@@ -303,6 +335,46 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ onStartOver, locationName, 
             Start Over
           </Button>
         )}
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5, mt: 2 }}>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <Select
+              value={selectedMonth}
+              onChange={handleMonthChange}
+              displayEmpty
+              sx={{
+                borderRadius: '12px',
+                fontSize: '0.875rem',
+                '& .MuiSelect-select': { py: 1 },
+              }}
+            >
+              <MenuItem value="">All Months</MenuItem>
+              {MONTH_NAMES.map((name, index) => (
+                <MenuItem key={name} value={String(index + 1).padStart(2, '0')}>
+                  {name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl size="small" sx={{ minWidth: 150 }}>
+            <Select<number>
+              value={startYear}
+              onChange={handleStartYearChange}
+              sx={{
+                borderRadius: '12px',
+                fontSize: '0.875rem',
+                '& .MuiSelect-select': { py: 1 },
+              }}
+            >
+              {Array.from({ length: DEFAULT_START_YEAR - MIN_START_YEAR + 1 }, (_, i) => DEFAULT_START_YEAR - i).map((year) => (
+                <MenuItem key={year} value={year}>
+                  Since {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
       </Box>
       
       {/* Responsive Layout */}

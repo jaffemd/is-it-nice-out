@@ -23,11 +23,11 @@ This is a React + TypeScript historical weather tracking application that displa
 
 ### Key Components
 - `LocationInput.tsx` - Location search with Radar API autocomplete integration and theme toggle
-- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout, chart legend, and theme toggle
+- `CalendarGrid.tsx` - Main calendar view with responsive two-column layout, chart legend, theme toggle, month filter, and "since year" picker
 - `MonthView.tsx` - Individual month display component with dark mode support
 - `YearHeader.tsx` - Year section headers in calendar with theme-aware styling
 - `YearSummaryChart.tsx` - **Line + bar combo charts** showing nice days (bars) and average high temperature (line) for each year
-- `YearlyTotalChart.tsx` - Aggregated yearly statistics chart with theme integration
+- `YearlyTotalChart.tsx` - Aggregated yearly statistics with card view (3 or fewer years) or compact table view (4+ years)
 - `ThemeToggle.tsx` - Three-mode theme switcher (System → Light → Dark → System)
 - `ThemeContext.tsx` - Theme state management with localStorage persistence
 - `api.ts` - Data service layer for fetching and transforming Open-Meteo weather data
@@ -37,7 +37,7 @@ This is a React + TypeScript historical weather tracking application that displa
 ### Data Source
 - **Open-Meteo API** (https://archive-api.open-meteo.com) for historical weather data
 - **Radar API** for location autocomplete (requires API key)
-- Date range: January 1, 2023 to yesterday (most recent complete day)
+- Date range: Configurable via "Since [year]" picker, defaulting to 3 calendar years (currentYear-2), max 10 years
 - Real-time weather rating calculation based on temperature and weather code algorithms
 
 ### Data Models
@@ -77,7 +77,7 @@ interface WeatherEntry {
 - **Comprehensive legend**: Single legend explains both chart types and color meanings, positioned between yearly totals and monthly charts
 
 ### State Management
-- React hooks for local component state
+- React hooks for local component state (including month filter in CalendarGrid)
 - TanStack Query for server state management
 - **URL-based location persistence**: Location state managed through URL query parameters
 - **Theme state management**: React Context with localStorage persistence for theme preferences
